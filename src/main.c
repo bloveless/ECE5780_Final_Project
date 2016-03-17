@@ -33,16 +33,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
+#include "TaskHeartbeat.h"
+#include "TaskPIDController.h"
 
 /* Private variables ---------------------------------------------------------*/
-osThreadId defaultTaskHandle;
-osThreadId stepperTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void StartDefaultTask(void const * argument);
-void StartStepperTask(void const * argument);
-void InitPins(void);
 
 int main(void)
 {
@@ -55,7 +52,8 @@ int main(void)
     SystemClock_Config();
 
     /* Initialize all configured peripherals */
-    InitPins();
+    TaskHeartbeat_Init();
+    TaskPIDController_Init();
 
     /* add mutexes, ... */
 
@@ -63,12 +61,9 @@ int main(void)
 
     /* start timers, add new ones, ... */
 
-    /* Create the thread(s) */
-    /* definition and creation of defaultTask */
-    osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-    osThreadDef(stepperTask, StartStepperTask, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
-    stepperTaskHandle = osThreadCreate(osThread(stepperTask), NULL);
+    /* Register the thread(s) */
+    TaskHeartbeat_Register();
+    TaskPIDController_Register();
 
     /* add queues, ... */
 
@@ -87,7 +82,6 @@ int main(void)
  */
 void SystemClock_Config(void)
 {
-
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
@@ -110,82 +104,6 @@ void SystemClock_Config(void)
 
     /* SysTick_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
-
-}
-
-/* StartDefaultTask function */
-void StartDefaultTask(void const * argument)
-{
-    /* Infinite loop */
-    for (;;) {
-        GPIOC->ODR = (1 << 13);
-        osDelay(500);
-        GPIOC->ODR = 0;
-        osDelay(500);
-    }
-
-}
-
-void StartStepperTask(void const * argument)
-{
-    int stage = 0;
-
-    for (;;) {
-        switch (stage) {
-            case 0:
-                // Set 12 and reset the other pins
-                GPIOB->ODR = (1 << 12);
-                break;
-            case 1:
-                // Set 13 and reset the other pins
-                GPIOB->ODR = (1 << 13);
-                break;
-            case 2:
-                // Set 14 and reset the other pins
-                GPIOB->ODR = (1 << 14);
-                break;
-            case 3:
-                // Set 15 and reset the other pins
-                GPIOB->ODR = (1 << 15);
-                break;
-        }
-
-        // Go to the next stage
-        stage++;
-
-        // And reset it if it gets too high
-        if (stage > 3) {
-            stage = 0;
-        }
-
-        osDelay(10);
-    }
-}
-
-void InitPins(void)
-{
-    // Enable the GPIOC clock
-    __GPIOC_CLK_ENABLE();
-
-    // PC13 as an output (on board LED)
-    GPIO_InitTypeDef GPIOC_InitStruct;
-    GPIOC_InitStruct.Pin = GPIO_PIN_13;
-    GPIOC_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIOC_InitStruct.Pull = GPIO_NOPULL;
-    GPIOC_InitStruct.Speed = GPIO_SPEED_LOW;
-    HAL_GPIO_Init(GPIOC, &GPIOC_InitStruct);
-
-    // Enable the GPIOB clock
-    __GPIOB_CLK_ENABLE();
-
-    // Pin B12, B13, B14, B15 as output for stepper driving
-    GPIO_InitTypeDef GPIOB_InitStruct;
-    GPIOB_InitStruct.Pin =
-    GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-    GPIOB_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIOB_InitStruct.Pull = GPIO_NOPULL;
-    GPIOB_InitStruct.Speed = GPIO_SPEED_LOW;
-    HAL_GPIO_Init(GPIOB, &GPIOB_InitStruct);
 }
 
 #ifdef USE_FULL_ASSERT
@@ -207,13 +125,5 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 
 #endif
-
-/**
- * @}
- */
-
-/**
- * @}
- */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
