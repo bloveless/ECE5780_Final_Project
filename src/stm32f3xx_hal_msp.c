@@ -251,6 +251,9 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     GPIO_InitStruct.Alternate = GPIO_AF9_TIM15;
     HAL_GPIO_Init(Ultrasonic_1_Echo_GPIO_Port, &GPIO_InitStruct);
 
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+
   /* USER CODE BEGIN TIM15_MspInit 1 */
 
   /* USER CODE END TIM15_MspInit 1 */
