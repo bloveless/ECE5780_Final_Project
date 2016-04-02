@@ -1,10 +1,14 @@
 /**
   ******************************************************************************
-  * File Name          : mxconstants.h
-  * Description        : This file contains the common defines of the application
+  * @file    system_stm32f3xx.h
+  * @author  MCD Application Team
+  * @version V2.2.0
+  * @date    13-November-2015
+  * @brief   CMSIS Cortex-M4 Device System Source File for STM32F3xx devices.  
   ******************************************************************************
+  * @attention
   *
-  * COPYRIGHT(c) 2016 STMicroelectronics
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -29,55 +33,90 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
-
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private define ------------------------------------------------------------*/
-
-#define Motor_2_Quadrature_1_Pin GPIO_PIN_0
-#define Motor_2_Quadrature_1_GPIO_Port GPIOA
-#define Motor_2_Quadrature_2_Pin GPIO_PIN_1
-#define Motor_2_Quadrature_2_GPIO_Port GPIOA
-#define Ultrasonic_1_Echo_Pin GPIO_PIN_2
-#define Ultrasonic_1_Echo_GPIO_Port GPIOA
-#define Motor_2_Dir_1_Pin GPIO_PIN_3
-#define Motor_2_Dir_1_GPIO_Port GPIOA
-#define Motor_2_Enable_Pin GPIO_PIN_4
-#define Motor_2_Enable_GPIO_Port GPIOA
-#define Motor_2_Dir_2_Pin GPIO_PIN_5
-#define Motor_2_Dir_2_GPIO_Port GPIOA
-#define Motor_1_Enable_Pin GPIO_PIN_6
-#define Motor_1_Enable_GPIO_Port GPIOA
-#define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
-#define Ultrasonic_1_Pulse_GPIO_Port GPIOB
-#define Motor_1_Quadrature_1_Pin GPIO_PIN_8
-#define Motor_1_Quadrature_1_GPIO_Port GPIOA
-#define Motor_1_Quadrature_2_Pin GPIO_PIN_9
-#define Motor_1_Quadrature_2_GPIO_Port GPIOA
-#define Heartbeat_LED_Pin GPIO_PIN_3
-#define Heartbeat_LED_GPIO_Port GPIOB
-#define Motor_1_Dir_1_Pin GPIO_PIN_4
-#define Motor_1_Dir_1_GPIO_Port GPIOB
-#define Motor_1_Dir_2_Pin GPIO_PIN_5
-#define Motor_1_Dir_2_GPIO_Port GPIOB
-#define Accel_SCL_Pin GPIO_PIN_6
-#define Accel_SCL_GPIO_Port GPIOB
-#define Accel_SDA_Pin GPIO_PIN_7
-#define Accel_SDA_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
-
-/**
-  * @}
   */ 
 
+/** @addtogroup CMSIS
+  * @{
+  */
+
+/** @addtogroup stm32f3xx_system
+  * @{
+  */  
+  
+/**
+  * @brief Define to prevent recursive inclusion
+  */
+#ifndef __SYSTEM_STM32F3XX_H
+#define __SYSTEM_STM32F3XX_H
+
+#ifdef __cplusplus
+ extern "C" {
+#endif 
+
+/** @addtogroup STM32F3xx_System_Includes
+  * @{
+  */
+
 /**
   * @}
-*/ 
+  */
 
+
+/** @addtogroup STM32F3xx_System_Exported_types
+  * @{
+  */
+  /* This variable is updated in three ways:
+      1) by calling CMSIS function SystemCoreClockUpdate()
+      3) by calling HAL API function HAL_RCC_GetHCLKFreq()
+      3) by calling HAL API function HAL_RCC_ClockConfig()
+         Note: If you use this function to configure the system clock; then there
+               is no need to call the 2 first functions listed above, since SystemCoreClock
+               variable is updated automatically.
+  */
+extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
+
+
+/**
+  * @}
+  */
+
+/** @addtogroup STM32F3xx_System_Exported_Constants
+  * @{
+  */
+
+/**
+  * @}
+  */
+
+/** @addtogroup STM32F3xx_System_Exported_Macros
+  * @{
+  */
+
+/**
+  * @}
+  */
+
+/** @addtogroup STM32F3xx_System_Exported_Functions
+  * @{
+  */
+  
+extern void SystemInit(void);
+extern void SystemCoreClockUpdate(void);
+/**
+  * @}
+  */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /*__SYSTEM_STM32F3XX_H */
+
+/**
+  * @}
+  */
+  
+/**
+  * @}
+  */  
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

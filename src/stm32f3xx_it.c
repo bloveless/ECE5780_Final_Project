@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * File Name          : mxconstants.h
-  * Description        : This file contains the common defines of the application
+  * @file    stm32f3xx_it.c
+  * @brief   Interrupt Service Routines.
   ******************************************************************************
   *
   * COPYRIGHT(c) 2016 STMicroelectronics
@@ -31,53 +31,59 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f3xx_hal.h"
+#include "stm32f3xx.h"
+#include "stm32f3xx_it.h"
+#include "cmsis_os.h"
 
-/* USER CODE BEGIN Includes */
+/* USER CODE BEGIN 0 */
 
-/* USER CODE END Includes */
+/* USER CODE END 0 */
 
-/* Private define ------------------------------------------------------------*/
+/* External variables --------------------------------------------------------*/
 
-#define Motor_2_Quadrature_1_Pin GPIO_PIN_0
-#define Motor_2_Quadrature_1_GPIO_Port GPIOA
-#define Motor_2_Quadrature_2_Pin GPIO_PIN_1
-#define Motor_2_Quadrature_2_GPIO_Port GPIOA
-#define Ultrasonic_1_Echo_Pin GPIO_PIN_2
-#define Ultrasonic_1_Echo_GPIO_Port GPIOA
-#define Motor_2_Dir_1_Pin GPIO_PIN_3
-#define Motor_2_Dir_1_GPIO_Port GPIOA
-#define Motor_2_Enable_Pin GPIO_PIN_4
-#define Motor_2_Enable_GPIO_Port GPIOA
-#define Motor_2_Dir_2_Pin GPIO_PIN_5
-#define Motor_2_Dir_2_GPIO_Port GPIOA
-#define Motor_1_Enable_Pin GPIO_PIN_6
-#define Motor_1_Enable_GPIO_Port GPIOA
-#define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
-#define Ultrasonic_1_Pulse_GPIO_Port GPIOB
-#define Motor_1_Quadrature_1_Pin GPIO_PIN_8
-#define Motor_1_Quadrature_1_GPIO_Port GPIOA
-#define Motor_1_Quadrature_2_Pin GPIO_PIN_9
-#define Motor_1_Quadrature_2_GPIO_Port GPIOA
-#define Heartbeat_LED_Pin GPIO_PIN_3
-#define Heartbeat_LED_GPIO_Port GPIOB
-#define Motor_1_Dir_1_Pin GPIO_PIN_4
-#define Motor_1_Dir_1_GPIO_Port GPIOB
-#define Motor_1_Dir_2_Pin GPIO_PIN_5
-#define Motor_1_Dir_2_GPIO_Port GPIOB
-#define Accel_SCL_Pin GPIO_PIN_6
-#define Accel_SCL_GPIO_Port GPIOB
-#define Accel_SDA_Pin GPIO_PIN_7
-#define Accel_SDA_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
+extern TIM_HandleTypeDef htim6;
 
-/* USER CODE END Private defines */
+/******************************************************************************/
+/*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
+/******************************************************************************/
 
 /**
-  * @}
-  */ 
+* @brief This function handles System tick timer.
+*/
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  osSystickHandler();
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
+
+/******************************************************************************/
+/* STM32F3xx Peripheral Interrupt Handlers                                    */
+/* Add here the Interrupt Handlers for the used peripherals.                  */
+/* For the available peripheral interrupt handler names,                      */
+/* please refer to the startup file (startup_stm32f3xx.s).                    */
+/******************************************************************************/
 
 /**
-  * @}
-*/ 
+* @brief This function handles TIM6 global and DAC1 underrun error interrupts.
+*/
+void TIM6_DAC1_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC1_IRQn 0 */
 
+  /* USER CODE END TIM6_DAC1_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC1_IRQn 1 */
+
+  /* USER CODE END TIM6_DAC1_IRQn 1 */
+}
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

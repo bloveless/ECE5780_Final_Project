@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * File Name          : mxconstants.h
-  * Description        : This file contains the common defines of the application
+  * @file    stm32f3xx_it.h
+  * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
   *
   * COPYRIGHT(c) 2016 STMicroelectronics
@@ -30,54 +30,34 @@
   *
   ******************************************************************************
   */
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __STM32F3xx_IT_H
+#define __STM32F3xx_IT_H
+
+#ifdef __cplusplus
+ extern "C" {
+#endif 
+
 /* Includes ------------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
 
-/* USER CODE BEGIN Includes */
+void NMI_Handler(void);
+void HardFault_Handler(void);
+void MemManage_Handler(void);
+void BusFault_Handler(void);
+void UsageFault_Handler(void);
+void DebugMon_Handler(void);
+void SysTick_Handler(void);
+void TIM6_DAC1_IRQHandler(void);
 
-/* USER CODE END Includes */
+#ifdef __cplusplus
+}
+#endif
 
-/* Private define ------------------------------------------------------------*/
-
-#define Motor_2_Quadrature_1_Pin GPIO_PIN_0
-#define Motor_2_Quadrature_1_GPIO_Port GPIOA
-#define Motor_2_Quadrature_2_Pin GPIO_PIN_1
-#define Motor_2_Quadrature_2_GPIO_Port GPIOA
-#define Ultrasonic_1_Echo_Pin GPIO_PIN_2
-#define Ultrasonic_1_Echo_GPIO_Port GPIOA
-#define Motor_2_Dir_1_Pin GPIO_PIN_3
-#define Motor_2_Dir_1_GPIO_Port GPIOA
-#define Motor_2_Enable_Pin GPIO_PIN_4
-#define Motor_2_Enable_GPIO_Port GPIOA
-#define Motor_2_Dir_2_Pin GPIO_PIN_5
-#define Motor_2_Dir_2_GPIO_Port GPIOA
-#define Motor_1_Enable_Pin GPIO_PIN_6
-#define Motor_1_Enable_GPIO_Port GPIOA
-#define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
-#define Ultrasonic_1_Pulse_GPIO_Port GPIOB
-#define Motor_1_Quadrature_1_Pin GPIO_PIN_8
-#define Motor_1_Quadrature_1_GPIO_Port GPIOA
-#define Motor_1_Quadrature_2_Pin GPIO_PIN_9
-#define Motor_1_Quadrature_2_GPIO_Port GPIOA
-#define Heartbeat_LED_Pin GPIO_PIN_3
-#define Heartbeat_LED_GPIO_Port GPIOB
-#define Motor_1_Dir_1_Pin GPIO_PIN_4
-#define Motor_1_Dir_1_GPIO_Port GPIOB
-#define Motor_1_Dir_2_Pin GPIO_PIN_5
-#define Motor_1_Dir_2_GPIO_Port GPIOB
-#define Accel_SCL_Pin GPIO_PIN_6
-#define Accel_SCL_GPIO_Port GPIOB
-#define Accel_SDA_Pin GPIO_PIN_7
-#define Accel_SDA_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-*/ 
+#endif /* __STM32F3xx_IT_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

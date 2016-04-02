@@ -1,4 +1,4 @@
-The "stm32f1xx.h" and "system_stm32f1xx.h" files are provided 
+The "stm32f3xx.h" and "system_stm32f3xx.h" files are provided 
 only as a functional sample.
 
 For real applications they must be replaced by the vendor provided files.
