@@ -186,15 +186,17 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   
     /**TIM1 GPIO Configuration    
     PA8     ------> TIM1_CH1
-    PA9     ------> TIM1_CH2 
     */
-    GPIO_InitStruct.Pin = Motor_1_Quadrature_1_Pin|Motor_1_Quadrature_2_Pin;
+    GPIO_InitStruct.Pin = Left_Track_Encoder_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(Left_Track_Encoder_GPIO_Port, &GPIO_InitStruct);
 
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
   /* USER CODE END TIM1_MspInit 1 */
@@ -209,14 +211,13 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   
     /**TIM2 GPIO Configuration    
     PA0     ------> TIM2_CH1
-    PA1     ------> TIM2_CH2 
     */
-    GPIO_InitStruct.Pin = Motor_2_Quadrature_1_Pin|Motor_2_Quadrature_2_Pin;
+    GPIO_InitStruct.Pin = Right_Track_Encoder_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(Right_Track_Encoder_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM2_MspInit 1 */
 
@@ -251,6 +252,9 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     GPIO_InitStruct.Alternate = GPIO_AF9_TIM15;
     HAL_GPIO_Init(Ultrasonic_1_Echo_GPIO_Port, &GPIO_InitStruct);
 
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
   /* USER CODE BEGIN TIM15_MspInit 1 */
 
   /* USER CODE END TIM15_MspInit 1 */
@@ -299,9 +303,17 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   
     /**TIM1 GPIO Configuration    
     PA8     ------> TIM1_CH1
-    PA9     ------> TIM1_CH2 
     */
-    HAL_GPIO_DeInit(GPIOA, Motor_1_Quadrature_1_Pin|Motor_1_Quadrature_2_Pin);
+    HAL_GPIO_DeInit(Left_Track_Encoder_GPIO_Port, Left_Track_Encoder_Pin);
+
+    /* Peripheral interrupt DeInit*/
+  /* USER CODE BEGIN TIM1:TIM1_BRK_TIM15_IRQn disable */
+    /**
+    * Uncomment the line below to disable the "TIM1_BRK_TIM15_IRQn" interrupt
+    * Be aware, disabling shared interrupt may affect other IPs
+    */
+    /* HAL_NVIC_DisableIRQ(TIM1_BRK_TIM15_IRQn); */
+  /* USER CODE END TIM1:TIM1_BRK_TIM15_IRQn disable */
 
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
@@ -317,9 +329,8 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   
     /**TIM2 GPIO Configuration    
     PA0     ------> TIM2_CH1
-    PA1     ------> TIM2_CH2 
     */
-    HAL_GPIO_DeInit(GPIOA, Motor_2_Quadrature_1_Pin|Motor_2_Quadrature_2_Pin);
+    HAL_GPIO_DeInit(Right_Track_Encoder_GPIO_Port, Right_Track_Encoder_Pin);
 
   /* USER CODE BEGIN TIM2_MspDeInit 1 */
 
@@ -348,6 +359,15 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     PA2     ------> TIM15_CH1 
     */
     HAL_GPIO_DeInit(Ultrasonic_1_Echo_GPIO_Port, Ultrasonic_1_Echo_Pin);
+
+    /* Peripheral interrupt DeInit*/
+  /* USER CODE BEGIN TIM15:TIM1_BRK_TIM15_IRQn disable */
+    /**
+    * Uncomment the line below to disable the "TIM1_BRK_TIM15_IRQn" interrupt
+    * Be aware, disabling shared interrupt may affect other IPs
+    */
+    /* HAL_NVIC_DisableIRQ(TIM1_BRK_TIM15_IRQn); */
+  /* USER CODE END TIM15:TIM1_BRK_TIM15_IRQn disable */
 
   /* USER CODE BEGIN TIM15_MspDeInit 1 */
 

@@ -38,10 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define Motor_2_Quadrature_1_Pin GPIO_PIN_0
-#define Motor_2_Quadrature_1_GPIO_Port GPIOA
-#define Motor_2_Quadrature_2_Pin GPIO_PIN_1
-#define Motor_2_Quadrature_2_GPIO_Port GPIOA
+#define Right_Track_Encoder_Pin GPIO_PIN_0
+#define Right_Track_Encoder_GPIO_Port GPIOA
 #define Ultrasonic_1_Echo_Pin GPIO_PIN_2
 #define Ultrasonic_1_Echo_GPIO_Port GPIOA
 #define Motor_2_Dir_1_Pin GPIO_PIN_3
@@ -54,10 +52,10 @@
 #define Motor_1_Enable_GPIO_Port GPIOA
 #define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
 #define Ultrasonic_1_Pulse_GPIO_Port GPIOB
-#define Motor_1_Quadrature_1_Pin GPIO_PIN_8
-#define Motor_1_Quadrature_1_GPIO_Port GPIOA
-#define Motor_1_Quadrature_2_Pin GPIO_PIN_9
-#define Motor_1_Quadrature_2_GPIO_Port GPIOA
+#define Left_Track_Encoder_Pin GPIO_PIN_8
+#define Left_Track_Encoder_GPIO_Port GPIOA
+#define Counter_Direction_Pin GPIO_PIN_10
+#define Counter_Direction_GPIO_Port GPIOA
 #define Heartbeat_LED_Pin GPIO_PIN_3
 #define Heartbeat_LED_GPIO_Port GPIOB
 #define Motor_1_Dir_1_Pin GPIO_PIN_4
