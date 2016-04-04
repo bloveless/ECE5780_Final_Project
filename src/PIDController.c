@@ -5,8 +5,6 @@
  *      Author: brennon
  */
 
-#include "stm32f3xx_hal.h"
-#include "cmsis_os.h"
 #include "PIDController.h"
 
 #define PIDController_AUTOMATIC 1
