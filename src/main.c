@@ -68,6 +68,11 @@ static void MX_TIM15_Init(void);
 
 /* USER CODE END 0 */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
 int main(void)
 {
 
@@ -299,12 +304,12 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : Motor_2_Dir_1_Pin Motor_2_Dir_2_Pin */
   GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
-  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
+  /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Heartbeat_LED_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
+  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -313,15 +318,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : Counter_Direction_Pin */
   GPIO_InitStruct.Pin = Counter_Direction_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(Counter_Direction_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : Heartbeat_LED_Pin */
-  GPIO_InitStruct.Pin = Heartbeat_LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Heartbeat_LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(Counter_Direction_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -344,6 +342,8 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 
 #endif
+
+#pragma GCC diagnostic pop
 
 /**
   * @}

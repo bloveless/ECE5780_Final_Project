@@ -21,24 +21,24 @@ void PIDController_MX_TIM1_Init(void)
   TIM_SlaveConfigTypeDef sSlaveConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
 
-  PIDController_htim1.Instance = TIM1;
-  PIDController_htim1.Init.Prescaler = 0;
-  PIDController_htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  PIDController_htim1.Init.Period = 65535;
-  PIDController_htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  PIDController_htim1.Init.RepetitionCounter = 0;
-  HAL_TIM_Base_Init(&PIDController_htim1);
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 65535;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  HAL_TIM_Base_Init(&htim1);
 
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
   sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
   sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_BOTHEDGE;
   sSlaveConfig.TriggerFilter = 0;
-  HAL_TIM_SlaveConfigSynchronization(&PIDController_htim1, &sSlaveConfig);
+  HAL_TIM_SlaveConfigSynchronization(&htim1, &sSlaveConfig);
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&PIDController_htim1, &sMasterConfig);
+  HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig);
 
 }
 
@@ -49,22 +49,22 @@ void PIDController_MX_TIM2_Init(void)
   TIM_SlaveConfigTypeDef sSlaveConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
 
-  PIDController_htim2.Instance = TIM2;
-  PIDController_htim2.Init.Prescaler = 0;
-  PIDController_htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  PIDController_htim2.Init.Period = 65535;
-  PIDController_htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  HAL_TIM_Base_Init(&PIDController_htim2);
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 65535;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim2);
 
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
   sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
   sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_BOTHEDGE;
   sSlaveConfig.TriggerFilter = 0;
-  HAL_TIM_SlaveConfigSynchronization(&PIDController_htim2, &sSlaveConfig);
+  HAL_TIM_SlaveConfigSynchronization(&htim2, &sSlaveConfig);
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&PIDController_htim2, &sMasterConfig);
+  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
 
 }
 
@@ -75,34 +75,34 @@ void PIDController_MX_TIM3_Init(void)
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
 
-  PIDController_htim3.Instance = TIM3;
+  htim3.Instance = TIM3;
   // Starting at 4Mhz
-  PIDController_htim3.Init.Prescaler = 2;
-  PIDController_htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Prescaler = 2;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   // Should get us down to 100Hz
-  PIDController_htim3.Init.Period = 20000;
-  PIDController_htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  HAL_TIM_Base_Init(&PIDController_htim3);
+  htim3.Init.Period = 20000;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim3);
 
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  HAL_TIM_ConfigClockSource(&PIDController_htim3, &sClockSourceConfig);
+  HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig);
 
-  HAL_TIM_PWM_Init(&PIDController_htim3);
+  HAL_TIM_PWM_Init(&htim3);
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&PIDController_htim3, &sMasterConfig);
+  HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig);
 
   PIDController_htim3ConfigOC.OCMode = TIM_OCMODE_PWM1;
   PIDController_htim3ConfigOC.Pulse = 0;
   PIDController_htim3ConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   PIDController_htim3ConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  HAL_TIM_PWM_ConfigChannel(&PIDController_htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_1);
+  HAL_TIM_PWM_ConfigChannel(&htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_1);
 
   PIDController_htim3ConfigOC.Pulse = 0;
-  HAL_TIM_PWM_ConfigChannel(&PIDController_htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_2);
+  HAL_TIM_PWM_ConfigChannel(&htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_2);
 
-  HAL_TIM_MspPostInit(&PIDController_htim3);
+  HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -219,11 +219,11 @@ void PIDController_Register(void)
 
 void PIDController_Task(void const * argument)
 {
-  HAL_TIM_Base_Start(&PIDController_htim1);
-  HAL_TIM_Base_Start(&PIDController_htim2);
-  HAL_TIM_Base_Start(&PIDController_htim3);
-  HAL_TIM_PWM_Start(&PIDController_htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&PIDController_htim3, TIM_CHANNEL_2);
+  HAL_TIM_Base_Start(&htim1);
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
   tim1Config.Ki = 5;
   tim1Config.Kp = 2;
@@ -260,8 +260,8 @@ void PIDController_Task(void const * argument)
 
   while(1)
   {
-    leftEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim1);
-    rightEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim2);
+    leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
+    rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
 
     // Calculate how far the wheel as spun since the last interval
     tim1Config.Diff = leftEncoderCount - tim1Config.Last;
@@ -271,8 +271,8 @@ void PIDController_Task(void const * argument)
     tim2Config.Last = rightEncoderCount;
 
     // Update the PWM here to speed up/slow down the motor
-    __HAL_TIM_SET_COMPARE(&PIDController_htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
-    __HAL_TIM_SET_COMPARE(&PIDController_htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
 
     // Process the variables for the next time around
     PIDController_ControllerCompute(&tim1Config);

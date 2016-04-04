@@ -27,9 +27,9 @@ typedef struct {
     float ITerm;
 } PIDController_Config;
 
-TIM_HandleTypeDef PIDController_htim1;
-TIM_HandleTypeDef PIDController_htim2;
-TIM_HandleTypeDef PIDController_htim3;
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 TIM_OC_InitTypeDef PIDController_htim3ConfigOC;
 osThreadId PIDController_pidControllerTaskHandle;
 
