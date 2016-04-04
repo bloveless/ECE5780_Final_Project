@@ -12,34 +12,9 @@
 #define PIDController_AUTOMATIC 1
 #define PIDController_MANUAL 0
 
-TIM_HandleTypeDef PIDController_htim1;
-TIM_HandleTypeDef PIDController_htim2;
-TIM_HandleTypeDef PIDController_htim3;
-TIM_OC_InitTypeDef PIDController_htim3ConfigOC;
-osThreadId PIDController_pidControllerTaskHandle;
-
-uint32_t PIDController_leftEncoderCount;
-uint32_t PIDController_rightEncoderCount;
-
-// PID Controller tunings
-// Completely based on https://github.com/br3ttb/Arduino-PID-Library
-uint8_t inAuto;
-float *myInput, *myOutput, *mySetpoint, ITerm, lastInput;
-uint16_t outMin = 150;
-uint16_t outMax = 250;
-// Adjust these values to tune the PID Controller
-float ki = 5;
-float kd = 1;
-float kp = 2;
 // Default sample time is .1 seconds
 // This also controls the delay in the task
 uint8_t SampleTime = 250;
-// uint32_t lastTime;
-// Pulse is the width of the pwm signal (0 - 65535)
-float PIDController_Tim1Pulse = 0;
-float PIDController_Tim1Last = 0;
-float PIDController_Tim1Diff = 0;
-float PIDController_Tim1Goal = 5;
 
 /* TIM1 init function */
 void PIDController_MX_TIM1_Init(void)
@@ -103,9 +78,11 @@ void PIDController_MX_TIM3_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig;
 
   PIDController_htim3.Instance = TIM3;
-  PIDController_htim3.Init.Prescaler = 0;
+  // Starting at 4Mhz
+  PIDController_htim3.Init.Prescaler = 2;
   PIDController_htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  PIDController_htim3.Init.Period = 250;
+  // Should get us down to 100Hz
+  PIDController_htim3.Init.Period = 20000;
   PIDController_htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   HAL_TIM_Base_Init(&PIDController_htim3);
 
@@ -146,82 +123,85 @@ void PIDController_SetCounterMode(TIM_HandleTypeDef *htim, uint32_t CounterMode)
 }
 
 // Completely based on https://github.com/br3ttb/Arduino-PID-Library
-void PIDController_ControllerInit(float* Input, float* Output, float* Setpoint,
-    float Kp, float Ki, float Kd)
-{
-
-  myOutput = Output;
-  myInput = Input;
-  mySetpoint = Setpoint;
-  inAuto = 0;
-
-  PIDController_ControllerSetTunings(Kp, Ki, Kd);
-
-  // lastTime = HAL_GetTick()-SampleTime;
-}
-
-void PIDController_ControllerCompute(void)
+void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig)
 {
   // If we are in manual mode then just move along
-  if(!inAuto) return;
+  if(!(pidControllerConfig->InAuto)) return;
 
-  // The task will make sure this is run every 100ms
+  // The task will make sure this is run every SampleTime(ms)
   // no need to do it here
-  // unsigned long now = HAL_GetTick();
-  // unsigned long timeChange = (now - lastTime);
-  // if(timeChange>=SampleTime)
-  // {
+
   /*Compute all the working error variables*/
-  volatile float input = *myInput;
-  volatile float error = *mySetpoint - input;
-  ITerm+= (ki * error);
-  if(ITerm > outMax) ITerm= outMax;
-  else if(ITerm < outMin) ITerm= outMin;
-  volatile float dInput = (input - lastInput);
+  volatile float input = pidControllerConfig->Input;
+  volatile float error = pidControllerConfig->Goal - input;
+  pidControllerConfig->ITerm += (pidControllerConfig->Ki * error);
+
+  /* Make sure the ITerm is within the OutMin and OutMax limits */
+  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax)
+  {
+    pidControllerConfig->ITerm= pidControllerConfig->OutMax;
+  }
+  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin)
+  {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
+  }
+
+  volatile float dInput = (input - pidControllerConfig->LastInput);
 
   /*Compute PID Output*/
-  volatile float output = kp * error + ITerm - kd * dInput;
+  volatile float output = pidControllerConfig->Kp * error
+      + pidControllerConfig->ITerm
+      - pidControllerConfig->Kd * dInput;
 
-  if(output > outMax) output = outMax;
-  else if(output < outMin) output = outMin;
-  *myOutput = output;
+  if(output > pidControllerConfig->OutMax) {
+    output = pidControllerConfig->OutMax;
+  }
+  else if(output < pidControllerConfig->OutMin) {
+    output = pidControllerConfig->OutMin;
+  }
+  pidControllerConfig->Output = output;
 
   /*Remember some variables for next time*/
-  lastInput = input;
-  // lastTime = now;
-  // return 1;
-  // }
-  //else return 0;
+  pidControllerConfig->LastInput = input;
 }
 
-void PIDController_ControllerSetTunings(float Kp, float Ki, float Kd)
+void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig)
 {
-  if (Kp<0 || Ki<0 || Kd<0) return;
+  if ((pidControllerConfig->Kp < 0)
+      || (pidControllerConfig->Ki < 0)
+      || (pidControllerConfig->Kd<0)) {
+    return;
+  }
 
   float SampleTimeInSec = ((float)SampleTime)/1000;
 
-  kp = Kp;
-  ki = Ki * SampleTimeInSec;
-  kd = Kd / SampleTimeInSec;
+  pidControllerConfig->Ki = pidControllerConfig->Ki * SampleTimeInSec;
+  pidControllerConfig->Kd = pidControllerConfig->Kd / SampleTimeInSec;
 }
 
-void PIDController_ControllerSetMode(int Mode)
+void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode)
 {
   uint8_t newAuto = (Mode == PIDController_AUTOMATIC);
-  if(newAuto == !inAuto)
+
+  if(newAuto == !pidControllerConfig->InAuto)
   {
     /*we just went from manual to auto*/
-    PIDController_ControllerReInitialize();
+    PIDController_ControllerReInitialize(pidControllerConfig);
   }
-  inAuto = newAuto;
+  pidControllerConfig->InAuto = newAuto;
 }
 
-void PIDController_ControllerReInitialize(void)
+void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig)
 {
-  ITerm = *myOutput;
-  lastInput = *myInput;
-  if(ITerm > outMax) ITerm = outMax;
-  else if(ITerm < outMin) ITerm = outMin;
+  pidControllerConfig->ITerm = pidControllerConfig->Output;
+  pidControllerConfig->LastInput = pidControllerConfig->Input;
+
+  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax) {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMax;
+  }
+  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin) {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
+  }
 }
 
 void PIDController_Init(void)
@@ -229,9 +209,8 @@ void PIDController_Init(void)
   PIDController_MX_TIM1_Init();
   PIDController_MX_TIM2_Init();
   PIDController_MX_TIM3_Init();
-  PIDController_ControllerInit(&PIDController_Tim1Diff, &PIDController_Tim1Pulse, &PIDController_Tim1Goal,
-      kp, ki, kd);
-  PIDController_ControllerSetMode(PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&tim1Config, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&tim2Config, PIDController_AUTOMATIC);
 }
 
 void PIDController_Register(void)
@@ -248,24 +227,58 @@ void PIDController_Task(void const * argument)
   HAL_TIM_PWM_Start(&PIDController_htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&PIDController_htim3, TIM_CHANNEL_2);
 
+  tim1Config.Ki = 5;
+  tim1Config.Kp = 2;
+  tim1Config.Kd = 1;
+  tim1Config.Input = 0;
+  tim1Config.Output = 0;
+  tim1Config.Goal = 5;
+  tim1Config.OutMin = 10000;
+  tim1Config.OutMax = 20000;
+  tim1Config.Last = 0;
+  tim1Config.Diff = 0;
+  tim1Config.LastInput = 0;
+  tim1Config.ITerm = 0;
+  PIDController_ControllerUpdateTunings(&tim1Config);
+
+  tim2Config.Ki = 5;
+  tim2Config.Kp = 2;
+  tim2Config.Kd = 1;
+  tim2Config.Input = 0;
+  tim2Config.Output = 0;
+  tim2Config.Goal = 5;
+  tim2Config.OutMin = 10000;
+  tim2Config.OutMax = 20000;
+  tim2Config.Last = 0;
+  tim2Config.Diff = 0;
+  tim2Config.LastInput = 0;
+  tim2Config.ITerm = 0;
+  PIDController_ControllerUpdateTunings(&tim2Config);
+
+  int32_t leftEncoderCount, rightEncoderCount;
+
+  // Wait for 5 seconds before we begin
+  osDelay(5000);
+
   while(1)
   {
-    PIDController_leftEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim1);
+    leftEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim1);
+    rightEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim2);
+
     // Calculate how far the wheel as spun since the last interval
-    PIDController_Tim1Diff = PIDController_leftEncoderCount - PIDController_Tim1Last;
-    PIDController_Tim1Last = PIDController_leftEncoderCount;
+    tim1Config.Diff = leftEncoderCount - tim1Config.Last;
+    tim1Config.Last = leftEncoderCount;
+
+    tim2Config.Diff = rightEncoderCount - tim2Config.Last;
+    tim2Config.Last = rightEncoderCount;
 
     // Update the PWM here to speed up/slow down the motor
-    // The new value will be stored in PIDController_Tim1Pulse and PIDController_Tim2Pulse
-
-    // PIDController_rightEncoderCount = __HAL_TIM_GET_COUNTER(&PIDController_htim2);
+    __HAL_TIM_SET_COMPARE(&PIDController_htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
+    __HAL_TIM_SET_COMPARE(&PIDController_htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
 
     // Process the variables for the next time around
-    PIDController_ControllerCompute();
-
-    PIDController_htim3ConfigOC.Pulse = PIDController_Tim1Pulse;
-    HAL_TIM_PWM_ConfigChannel(&PIDController_htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&PIDController_htim3, TIM_CHANNEL_1);
+    PIDController_ControllerCompute(&tim1Config);
+    PIDController_ControllerCompute(&tim2Config);
 
     osDelay(SampleTime);
   }
