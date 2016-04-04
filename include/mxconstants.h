@@ -56,6 +56,8 @@
 #define Left_Track_Encoder_GPIO_Port GPIOA
 #define Counter_Direction_Pin GPIO_PIN_10
 #define Counter_Direction_GPIO_Port GPIOA
+#define Servo_Pin GPIO_PIN_12
+#define Servo_GPIO_Port GPIOA
 #define Heartbeat_LED_Pin GPIO_PIN_3
 #define Heartbeat_LED_GPIO_Port GPIOB
 #define Motor_1_Dir_1_Pin GPIO_PIN_4

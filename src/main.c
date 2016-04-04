@@ -35,6 +35,7 @@
 #include "cmsis_os.h"
 #include "Heartbeat.h"
 #include "PIDController.h"
+#include "Servo.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -97,6 +98,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   Heartbeat_Init();
   PIDController_Init();
+  Servo_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -115,6 +117,7 @@ int main(void)
   /* definition and creation of defaultTask */
   Heartbeat_Register();
   PIDController_Register();
+  Servo_Register();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
