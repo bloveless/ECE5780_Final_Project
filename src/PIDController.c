@@ -12,7 +12,7 @@
 
 // Default sample time is .1 seconds
 // This also controls the delay in the task
-uint8_t SampleTime = 250;
+uint8_t SampleTime = 100;
 
 /* TIM1 init function */
 void PIDController_MX_TIM1_Init(void)
@@ -225,33 +225,35 @@ void PIDController_Task(void const * argument)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
-  tim1Config.Ki = 5;
-  tim1Config.Kp = 2;
-  tim1Config.Kd = 1;
+  tim1Config.Ki = 1000;
+  tim1Config.Kp = 400;
+  tim1Config.Kd = 50;
   tim1Config.Input = 0;
   tim1Config.Output = 0;
-  tim1Config.Goal = 5;
-  tim1Config.OutMin = 10000;
+  tim1Config.Goal = 3;
+  tim1Config.OutMin = 0;
   tim1Config.OutMax = 20000;
   tim1Config.Last = 0;
-  tim1Config.Diff = 0;
   tim1Config.LastInput = 0;
   tim1Config.ITerm = 0;
-  PIDController_ControllerUpdateTunings(&tim1Config);
+  // We picked values from STM Studio so we don't need to
+  // recalc the values here
+  // PIDController_ControllerUpdateTunings(&tim1Config);
 
-  tim2Config.Ki = 5;
-  tim2Config.Kp = 2;
-  tim2Config.Kd = 1;
+  tim2Config.Ki = 1000;
+  tim2Config.Kp = 400;
+  tim2Config.Kd = 50;
   tim2Config.Input = 0;
   tim2Config.Output = 0;
-  tim2Config.Goal = 5;
-  tim2Config.OutMin = 10000;
+  tim2Config.Goal = 3;
+  tim2Config.OutMin = 0;
   tim2Config.OutMax = 20000;
   tim2Config.Last = 0;
-  tim2Config.Diff = 0;
   tim2Config.LastInput = 0;
   tim2Config.ITerm = 0;
-  PIDController_ControllerUpdateTunings(&tim2Config);
+  // We picked values from STM Studio so we don't need to
+  // recalc the values here
+  // PIDController_ControllerUpdateTunings(&tim2Config);
 
   int32_t leftEncoderCount, rightEncoderCount;
 
@@ -264,19 +266,19 @@ void PIDController_Task(void const * argument)
     rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
 
     // Calculate how far the wheel as spun since the last interval
-    tim1Config.Diff = leftEncoderCount - tim1Config.Last;
+    tim1Config.Input = leftEncoderCount - tim1Config.Last;
     tim1Config.Last = leftEncoderCount;
 
-    tim2Config.Diff = rightEncoderCount - tim2Config.Last;
+    tim2Config.Input = rightEncoderCount - tim2Config.Last;
     tim2Config.Last = rightEncoderCount;
-
-    // Update the PWM here to speed up/slow down the motor
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
 
     // Process the variables for the next time around
     PIDController_ControllerCompute(&tim1Config);
     PIDController_ControllerCompute(&tim2Config);
+
+    // Update the PWM here to speed up/slow down the motor
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
 
     osDelay(SampleTime);
   }

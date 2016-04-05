@@ -22,7 +22,6 @@ typedef struct {
     int OutMin;
     int OutMax;
     float Last;
-    float Diff;
     float LastInput;
     float ITerm;
 } PIDController_Config;
