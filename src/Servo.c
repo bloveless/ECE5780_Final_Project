@@ -66,14 +66,16 @@ void Servo_Task()
   HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
   // Arms under carriage @ 550
-  // Arms completely retracted @ 1000
-  // Arms completely extended @ 2300
-  uint32_t servoPosition = 1000;
+  // Arms completely retracted @750
+  // Arms completely extended @ 2050
+  // Arms extended past completely @ 2250
+  uint32_t servoPosition = 750;
 
   __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, servoPosition);
 
   while(1)
   {
+    // servoPosition += 50;
     // __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, servoPosition);
     osDelay(100);
   }
