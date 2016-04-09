@@ -37,6 +37,7 @@
 #include "Heartbeat.h"
 #include "PIDController.h"
 #include "Servo.h"
+#include "MPU6050.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -59,7 +60,6 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 #pragma GCC diagnostic push
@@ -90,6 +90,7 @@ int main(void)
   Heartbeat_Init();
   PIDController_Init();
   Servo_Init();
+  MPU6050_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -110,9 +111,7 @@ int main(void)
   Heartbeat_Register();
   PIDController_Register();
   Servo_Register();
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+  MPU6050_Reg();
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -203,8 +202,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin, GPIO_PIN_RESET);
 
+  // TODO: this is the problem. It breaks the I2C GPIO Config
   /*Configure GPIO pins : Motor_2_Dir_1_Pin Motor_2_Dir_2_Pin */
   GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
