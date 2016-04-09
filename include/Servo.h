@@ -21,6 +21,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
 void MX_TIM16_Init(void);
 void Servo_Init(void);
 void Servo_Register(void);
+void Servo_SetPosition(uint8_t position);
 void Servo_Task(void);
 
 #endif /* SERVO_H_ */
