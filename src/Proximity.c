@@ -1,7 +1,7 @@
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
-//#include "Servo.h"
-//#include "PIDController.h"
+#include "Servo.h"
+#include "PIDController.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
 uint32_t ADC_Threshold = 2750;///////////////////////////////////////////////////////////
@@ -77,7 +77,8 @@ void Proximity_Init(void)
 
 void Proximity_Task(void const * argument)
 {
-  volatile uint32_t adcValue = 0;
+  uint32_t adcValue = 0;
+  uint32_t UltraSonic_Enabled = 1;
   for(;;)
   {
     if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
@@ -91,10 +92,13 @@ void Proximity_Task(void const * argument)
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
         //PIDController_Stop();
       }
-      if(adcValue < 2000 && !UltraSonic_Enabled)
+      else if(adcValue < 2000)
+      {
         UltraSonic_Enabled = 1;
+        Servo_SetPosition(0);
+      }
     }
-    osDelay(1);
+    osDelay(50);
   }
 }
 
@@ -114,6 +118,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
   volatile uint32_t captureValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
   if(captureValue > UltraSonic_Threshold)
   {
-    //Servo_SetPosition(75);
+    Servo_SetPosition(50);
   }
 }

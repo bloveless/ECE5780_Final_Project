@@ -86,7 +86,7 @@ void Servo_Task()
 
   // Set the servo to it's natural position
   // this should generate a pulse width of 1.5ms
-  Servo_SetPosition(50);
+  Servo_SetPosition(0);
 
   while(1)
   {
