@@ -94,7 +94,7 @@ void Proximity_Task(void const * argument)
       else if(adcValue < 2000)
         UltraSonic_Enabled = 1;
     }
-    osDelay(1);
+    osDelay(50);
   }
 }
 
