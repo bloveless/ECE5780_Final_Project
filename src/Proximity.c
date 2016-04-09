@@ -91,6 +91,8 @@ void Proximity_Task(void const * argument)
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
         //PIDController_Stop();
       }
+      if(adcValue < 2000 && !UltraSonic_Enabled)
+        UltraSonic_Enabled = 1;
     }
     osDelay(1);
   }
