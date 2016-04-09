@@ -34,14 +34,14 @@
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
 #include "Proximity.h"
+#include "Heartbeat.h"
+#include "PIDController.h"
 
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-
-I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -51,7 +51,6 @@ I2C_HandleTypeDef hi2c1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-                
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +60,11 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#pragma GCC diagnostic ignored "-Wreturn-type"
 
 int main(void)
 {
@@ -79,15 +83,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
-  //MX_TIM1_Init();
-  //MX_TIM2_Init();
-  //MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
   Proximity_Init();
-  //Heartbeat_Init();
-  //PIDController_Init();
+  Heartbeat_Init();
+  PIDController_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -105,8 +105,8 @@ int main(void)
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
   Proximity_Register();
-  //Heartbeat_Register();
-  //PIDController_Register();
+  Heartbeat_Register();
+  PIDController_Register();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -177,30 +177,6 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
 }
 
-/* I2C1 init function */
-void MX_I2C1_Init(void)
-{
-
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x2000090E;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  HAL_I2C_Init(&hi2c1);
-
-    /**Configure Analogue filter 
-    */
-  HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE);
-
-}
-
-
-
-
 /** Configure pins as 
         * Analog 
         * Input 
@@ -227,23 +203,23 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : Motor_2_Dir_1_Pin Motor_2_Dir_2_Pin */
   GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
-  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
+  /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Heartbeat_LED_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
+  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : Heartbeat_LED_Pin */
-  GPIO_InitStruct.Pin = Heartbeat_LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : Counter_Direction_Pin */
+  GPIO_InitStruct.Pin = Counter_Direction_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Heartbeat_LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(Counter_Direction_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -266,6 +242,8 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 
 #endif
+
+#pragma GCC diagnostic pop
 
 /**
   * @}

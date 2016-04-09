@@ -41,6 +41,8 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim15;
 
 extern TIM_HandleTypeDef htim6;
 
