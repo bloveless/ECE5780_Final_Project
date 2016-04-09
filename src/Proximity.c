@@ -11,6 +11,7 @@ uint32_t UltraSonic_Threshold = 10;
 osThreadId proximityTaskHandle;
 TIM_HandleTypeDef htim15;
 ADC_HandleTypeDef hadc1;
+uint32_t UltraSonic_Enabled = 1;
 
 void Proximity_Init(void)
 {
@@ -82,8 +83,9 @@ void Proximity_Task(void const * argument)
     if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
     {
       adcValue = HAL_ADC_GetValue(&hadc1);
-      if(adcValue > ADC_Threshold)
+      if(adcValue > ADC_Threshold && UltraSonic_Enabled)
       {
+        UltraSonic_Enabled = 0;
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
