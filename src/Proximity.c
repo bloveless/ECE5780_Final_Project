@@ -100,7 +100,7 @@ void Proximity_Task(void const * argument)
 
 void Proximity_Register(void)
 {
-  osThreadDef(proximityTask, Proximity_Task, osPriorityNormal, 0, 128);
+  osThreadDef(proximityTask, Proximity_Task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   proximityTaskHandle = osThreadCreate(osThread(proximityTask), NULL);
 }
 

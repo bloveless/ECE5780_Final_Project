@@ -36,6 +36,7 @@
 #include "Proximity.h"
 #include "Heartbeat.h"
 #include "PIDController.h"
+#include "Servo.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -88,6 +89,7 @@ int main(void)
   Proximity_Init();
   Heartbeat_Init();
   PIDController_Init();
+  Servo_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -107,6 +109,7 @@ int main(void)
   Proximity_Register();
   Heartbeat_Register();
   PIDController_Register();
+  Servo_Register();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -115,6 +118,8 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
+
+  volatile size_t freeSpace = xPortGetFreeHeapSize();
  
 
   /* Start scheduler */

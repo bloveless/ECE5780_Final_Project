@@ -18,7 +18,7 @@ void Heartbeat_Init(void)
 
 void Heartbeat_Register(void)
 {
-  osThreadDef(heartbeatTask, Heartbeat_Task, osPriorityNormal, 0, 128);
+  osThreadDef(heartbeatTask, Heartbeat_Task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   heartbeatTaskHandle = osThreadCreate(osThread(heartbeatTask), NULL);
 }
 

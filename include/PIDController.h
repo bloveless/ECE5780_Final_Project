@@ -11,6 +11,9 @@
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
 
+#define PIDController_AUTOMATIC 1
+#define PIDController_MANUAL 0
+
 typedef struct {
     uint8_t InAuto;
     float Ki;

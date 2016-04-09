@@ -7,9 +7,6 @@
 
 #include "PIDController.h"
 
-#define PIDController_AUTOMATIC 1
-#define PIDController_MANUAL 0
-
 // Default sample time is .1 seconds
 // This also controls the delay in the task
 uint8_t SampleTime = 100;
@@ -213,7 +210,7 @@ void PIDController_Init(void)
 
 void PIDController_Register(void)
 {
-  osThreadDef(pidControllerTask, PIDController_Task, osPriorityNormal, 0, 128);
+  osThreadDef(pidControllerTask, PIDController_Task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   PIDController_pidControllerTaskHandle = osThreadCreate(osThread(pidControllerTask), NULL);
 }
 
@@ -236,6 +233,7 @@ void PIDController_Task(void const * argument)
   tim1Config.Last = 0;
   tim1Config.LastInput = 0;
   tim1Config.ITerm = 0;
+  tim1Config.InAuto = PIDController_MANUAL;
   // We picked values from STM Studio so we don't need to
   // recalc the values here
   // PIDController_ControllerUpdateTunings(&tim1Config);
@@ -251,6 +249,7 @@ void PIDController_Task(void const * argument)
   tim2Config.Last = 0;
   tim2Config.LastInput = 0;
   tim2Config.ITerm = 0;
+  tim2Config.InAuto = PIDController_MANUAL;
   // We picked values from STM Studio so we don't need to
   // recalc the values here
   // PIDController_ControllerUpdateTunings(&tim2Config);
