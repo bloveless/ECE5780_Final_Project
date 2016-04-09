@@ -76,19 +76,23 @@ void Proximity_Init(void)
 
 void Proximity_Task(void const * argument)
 {
-  volatile uint32_t adcValue = 0;
+  uint32_t adcValue = 0;
+  uint32_t UltraSonic_Enabled = 1;
   for(;;)
   {
     if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
     {
       adcValue = HAL_ADC_GetValue(&hadc1);
-      if(adcValue > ADC_Threshold)
+      if(adcValue > ADC_Threshold && UltraSonic_Enabled)
       {
+        UltraSonic_Enabled = 0;
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
         //PIDController_Stop();
       }
+      else if(adcValue < 2000)
+        UltraSonic_Enabled = 1;
     }
     osDelay(1);
   }
