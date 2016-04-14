@@ -50,6 +50,8 @@ void Proximity_Init(void)
   //ADC1 Init
   ADC_ChannelConfTypeDef sConfig;
 
+    /**Common config
+    */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -60,11 +62,13 @@ void Proximity_Init(void)
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 1;
   hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.EOCSelection = EOC_SINGLE_CONV;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.Overrun = OVR_DATA_OVERWRITTEN;
+  hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   HAL_ADC_Init(&hadc1);
 
+    /**Configure Regular Channel
+    */
   sConfig.Channel = ADC_CHANNEL_12;
   sConfig.Rank = 1;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -77,7 +81,7 @@ void Proximity_Init(void)
 
 void Proximity_Task(void const * argument)
 {
-  uint32_t adcValue = 0;
+  volatile uint32_t adcValue = 0;
   uint32_t UltraSonic_Enabled = 1;
   for(;;)
   {
@@ -87,10 +91,10 @@ void Proximity_Task(void const * argument)
       if(adcValue > ADC_Threshold && UltraSonic_Enabled)
       {
         UltraSonic_Enabled = 0;
+        PIDController_Stop();
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
-        //PIDController_Stop();
       }
       else if(adcValue < 2000)
       {

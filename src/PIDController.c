@@ -12,7 +12,7 @@
 uint8_t SampleTime = 100;
 
 /* TIM1 init function */
-void PIDController_MX_TIM1_Init(void)
+void MX_TIM1_Init(void)
 {
 
   TIM_SlaveConfigTypeDef sSlaveConfig;
@@ -40,7 +40,7 @@ void PIDController_MX_TIM1_Init(void)
 }
 
 /* TIM2 init function */
-void PIDController_MX_TIM2_Init(void)
+void MX_TIM2_Init(void)
 {
 
   TIM_SlaveConfigTypeDef sSlaveConfig;
@@ -66,17 +66,16 @@ void PIDController_MX_TIM2_Init(void)
 }
 
 /* TIM3 init function */
-void PIDController_MX_TIM3_Init(void)
+void MX_TIM3_Init(void)
 {
 
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
 
   htim3.Instance = TIM3;
-  // Starting at 4Mhz
   htim3.Init.Prescaler = 2;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  // Should get us down to 100Hz
   htim3.Init.Period = 20000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   HAL_TIM_Base_Init(&htim3);
@@ -90,14 +89,13 @@ void PIDController_MX_TIM3_Init(void)
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig);
 
-  PIDController_htim3ConfigOC.OCMode = TIM_OCMODE_PWM1;
-  PIDController_htim3ConfigOC.Pulse = 0;
-  PIDController_htim3ConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  PIDController_htim3ConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  HAL_TIM_PWM_ConfigChannel(&htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_1);
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
 
-  PIDController_htim3ConfigOC.Pulse = 0;
-  HAL_TIM_PWM_ConfigChannel(&htim3, &PIDController_htim3ConfigOC, TIM_CHANNEL_2);
+  HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2);
 
   HAL_TIM_MspPostInit(&htim3);
 
@@ -160,6 +158,7 @@ void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig)
   pidControllerConfig->LastInput = input;
 }
 
+/**
 void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig)
 {
   if ((pidControllerConfig->Kp < 0)
@@ -173,6 +172,7 @@ void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerCo
   pidControllerConfig->Ki = pidControllerConfig->Ki * SampleTimeInSec;
   pidControllerConfig->Kd = pidControllerConfig->Kd / SampleTimeInSec;
 }
+**/
 
 void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode)
 {
@@ -199,11 +199,90 @@ void PIDController_ControllerReInitialize(PIDController_Config* pidControllerCon
   }
 }
 
+void PIDController_Stop()
+{
+  // Disable the PIDController
+  PIDController_ControllerSetMode(&tim1Config, PIDController_MANUAL);
+  PIDController_ControllerSetMode(&tim2Config, PIDController_MANUAL);
+
+  // And stop the motors
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+}
+
+void PIDController_SetDirection(int direction)
+{
+  if(direction == PIDController_STOP)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
+
+    return;
+  }
+
+  if(direction == PIDController_FORWARD)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
+
+    return;
+  }
+
+  if(direction == PIDController_LEFT)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
+    return;
+  }
+
+  if(direction == PIDController_RIGHT)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
+
+    return;
+  }
+
+  if(direction == PIDController_SPINLEFT)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_SET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
+
+    return;
+  }
+
+  if(direction == PIDController_SPINRIGHT)
+  {
+    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_SET);
+
+    return;
+  }
+}
+
 void PIDController_Init(void)
 {
-  PIDController_MX_TIM1_Init();
-  PIDController_MX_TIM2_Init();
-  PIDController_MX_TIM3_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   PIDController_ControllerSetMode(&tim1Config, PIDController_AUTOMATIC);
   PIDController_ControllerSetMode(&tim2Config, PIDController_AUTOMATIC);
 }
@@ -234,9 +313,6 @@ void PIDController_Task(void const * argument)
   tim1Config.LastInput = 0;
   tim1Config.ITerm = 0;
   tim1Config.InAuto = PIDController_MANUAL;
-  // We picked values from STM Studio so we don't need to
-  // recalc the values here
-  // PIDController_ControllerUpdateTunings(&tim1Config);
 
   tim2Config.Ki = 1000;
   tim2Config.Kp = 400;
@@ -250,14 +326,15 @@ void PIDController_Task(void const * argument)
   tim2Config.LastInput = 0;
   tim2Config.ITerm = 0;
   tim2Config.InAuto = PIDController_MANUAL;
-  // We picked values from STM Studio so we don't need to
-  // recalc the values here
-  // PIDController_ControllerUpdateTunings(&tim2Config);
 
   int32_t leftEncoderCount, rightEncoderCount;
 
   // Wait for 5 seconds before we begin
   osDelay(5000);
+
+  // Set the motors to stay stopped
+  PIDController_SetDirection(PIDController_STOP);
+  PIDController_Stop();
 
   while(1)
   {
@@ -276,8 +353,14 @@ void PIDController_Task(void const * argument)
     PIDController_ControllerCompute(&tim2Config);
 
     // Update the PWM here to speed up/slow down the motor
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
+    if(tim1Config.InAuto == PIDController_AUTOMATIC)
+    {
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
+    }
+
+    if(tim2Config.InAuto == PIDController_AUTOMATIC) {
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
+    }
 
     osDelay(SampleTime);
   }

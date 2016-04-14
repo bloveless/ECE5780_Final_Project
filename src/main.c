@@ -118,9 +118,6 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
-  volatile size_t freeSpace = xPortGetFreeHeapSize();
- 
-
   /* Start scheduler */
   osKernelStart();
   
@@ -166,9 +163,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2);
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1
-                              |RCC_PERIPHCLK_ADC12;
-  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_TIM1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
@@ -202,9 +197,8 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
 
-  // TODO: this is the problem. It breaks the I2C GPIO Config
   /*Configure GPIO pins : Motor_2_Dir_1_Pin Motor_2_Dir_2_Pin */
   GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -218,13 +212,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : Counter_Direction_Pin */
-  GPIO_InitStruct.Pin = Counter_Direction_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Counter_Direction_GPIO_Port, &GPIO_InitStruct);
 
 }
 

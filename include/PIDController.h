@@ -14,6 +14,14 @@
 #define PIDController_AUTOMATIC 1
 #define PIDController_MANUAL 0
 
+#define PIDController_STOP 1
+#define PIDController_FORWARD 2
+#define PIDController_REVERSE 3
+#define PIDController_LEFT 4
+#define PIDController_RIGHT 5
+#define PIDController_SPINLEFT 6
+#define PIDController_SPINRIGHT 7
+
 typedef struct {
     uint8_t InAuto;
     float Ki;
@@ -32,7 +40,6 @@ typedef struct {
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-TIM_OC_InitTypeDef PIDController_htim3ConfigOC;
 osThreadId PIDController_pidControllerTaskHandle;
 
 uint32_t PIDController_leftEncoderCount;
@@ -49,13 +56,14 @@ uint8_t SampleTime;
 // if it is included here
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
 
-void PIDController_MX_TIM1_Init(void);
-void PIDController_MX_TIM2_Init(void);
-void PIDController_MX_TIM3_Init(void);
+void MX_TIM1_Init(void);
+void MX_TIM2_Init(void);
+void MX_TIM3_Init(void);
 void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig);
 void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig);
 void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode);
 void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig);
+void PIDController_Stop();
 void PIDController_Init(void);
 void PIDController_Register(void);
 void PIDController_Task(void const * argument);
