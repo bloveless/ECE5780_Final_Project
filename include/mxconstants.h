@@ -46,8 +46,6 @@
 #define Motor_2_Dir_1_GPIO_Port GPIOA
 #define Motor_2_Enable_Pin GPIO_PIN_4
 #define Motor_2_Enable_GPIO_Port GPIOA
-#define Motor_2_Dir_2_Pin GPIO_PIN_5
-#define Motor_2_Dir_2_GPIO_Port GPIOA
 #define Motor_1_Enable_Pin GPIO_PIN_6
 #define Motor_1_Enable_GPIO_Port GPIOA
 #define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
@@ -56,6 +54,8 @@
 #define IR_ADC_GPIO_Port GPIOB
 #define Left_Track_Encoder_Pin GPIO_PIN_8
 #define Left_Track_Encoder_GPIO_Port GPIOA
+#define Motor_2_Dir_2_Pin GPIO_PIN_10
+#define Motor_2_Dir_2_GPIO_Port GPIOA
 #define Servo_Pin GPIO_PIN_12
 #define Servo_GPIO_Port GPIOA
 #define Heartbeat_LED_Pin GPIO_PIN_3

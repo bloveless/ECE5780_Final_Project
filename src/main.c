@@ -90,7 +90,7 @@ int main(void)
   Heartbeat_Init();
   PIDController_Init();
   Servo_Init();
-  MPU6050_Init();
+  // MPU6050_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -111,7 +111,7 @@ int main(void)
   Heartbeat_Register();
   PIDController_Register();
   Servo_Register();
-  MPU6050_Reg();
+  // MPU6050_Reg();
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -199,12 +199,12 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : Motor_2_Dir_1_Pin Motor_2_Dir_2_Pin */
-  GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin;
+  /*Configure GPIO pin : Motor_2_Dir_1_Pin */
+  GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(Motor_2_Dir_1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Heartbeat_LED_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
   GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
@@ -212,6 +212,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : Motor_2_Dir_2_Pin */
+  GPIO_InitStruct.Pin = Motor_2_Dir_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(Motor_2_Dir_2_GPIO_Port, &GPIO_InitStruct);
 
 }
 

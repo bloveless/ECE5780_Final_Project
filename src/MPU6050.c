@@ -14,6 +14,9 @@
 //  MPU6050_Read(&hi2c1, &MPU6050_DATA);
 //  MPU6050_Read(&hi2c1, &MPU6050_DATA);
 
+#define MPU_WRITE_ADDRESS 0xD0
+#define MPU_READ_ADDRESS 0xD1
+
 uint8_t tx_data[2];
 uint8_t rx_data[14];
 
@@ -46,41 +49,46 @@ void MPU6050_Init(){
 
 	MX_I2C1_Init();
 
+	volatile HAL_StatusTypeDef lastStatus;
 
+	lastStatus = HAL_I2C_IsDeviceReady(&hi2c1, MPU_READ_ADDRESS, 1, 100);
 
-	tx_data[0] = 0x75;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 1, 1000);
-	HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
+	if(lastStatus == HAL_OK)
+	{
+    tx_data[0] = 0x75;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 1, 1000);
+    lastStatus = HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
 
-	tx_data[0] = 0x6B;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 1, 1000);
-	HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
+    tx_data[0] = 0x6B;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 1, 1000);
+    lastStatus = HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
 
-	tx_data[0] = 0x6B;
-	tx_data[1] = 1<<7;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
-	HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
-	HAL_Delay(100);
+    tx_data[0] = 0x6B;
+    tx_data[1] = 1<<7;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
+    lastStatus = HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
+    HAL_Delay(100);
 
-	tx_data[0] = 0x6B;
-	tx_data[1] = 0x00;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
-	HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
-	HAL_Delay(100);
-	// SET Range +-2G
-	tx_data[0] = 0x1C;
-	tx_data[1] = 0x00;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
-	// GYRO config
-	tx_data[0] = 0x1B;
-	tx_data[1] = 0x00;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
+    tx_data[0] = 0x6B;
+    tx_data[1] = 0x00;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
+    lastStatus = HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
+    HAL_Delay(100);
+    // SET Range +-2G
+    tx_data[0] = 0x1C;
+    tx_data[1] = 0x00;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
+    // GYRO config
+    tx_data[0] = 0x1B;
+    tx_data[1] = 0x00;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
 
-	tx_data[0] = 0x68;
-	tx_data[1] = 0x07;
-	HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
-	HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
-	HAL_Delay(100);
+    tx_data[0] = 0x68;
+    tx_data[1] = 0x07;
+    lastStatus = HAL_I2C_Master_Transmit(&hi2c1, 0xD0, &tx_data[0], 2, 1000);
+    lastStatus = HAL_I2C_Master_Receive(&hi2c1, 0xD0, &rx_data[0], 1, 1000);
+    HAL_Delay(100);
+	}
 }
 
 void MPU6050_Reg(){

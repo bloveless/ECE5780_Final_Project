@@ -210,6 +210,14 @@ void PIDController_Stop()
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
 }
 
+void PIDController_Start(int withPID)
+{
+  if(withPID == 1)
+  {
+
+  }
+}
+
 void PIDController_SetDirection(int direction)
 {
   if(direction == PIDController_STOP)
@@ -255,6 +263,7 @@ void PIDController_SetDirection(int direction)
     return;
   }
 
+  // ES NO BUENO
   if(direction == PIDController_SPINLEFT)
   {
     HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
@@ -312,7 +321,7 @@ void PIDController_Task(void const * argument)
   tim1Config.Last = 0;
   tim1Config.LastInput = 0;
   tim1Config.ITerm = 0;
-  tim1Config.InAuto = PIDController_MANUAL;
+  tim1Config.InAuto = PIDController_AUTOMATIC;
 
   tim2Config.Ki = 1000;
   tim2Config.Kp = 400;
@@ -325,7 +334,7 @@ void PIDController_Task(void const * argument)
   tim2Config.Last = 0;
   tim2Config.LastInput = 0;
   tim2Config.ITerm = 0;
-  tim2Config.InAuto = PIDController_MANUAL;
+  tim2Config.InAuto = PIDController_AUTOMATIC;
 
   int32_t leftEncoderCount, rightEncoderCount;
 
@@ -333,8 +342,10 @@ void PIDController_Task(void const * argument)
   osDelay(5000);
 
   // Set the motors to stay stopped
-  PIDController_SetDirection(PIDController_STOP);
-  PIDController_Stop();
+  // PIDController_SetDirection(PIDController_STOP);
+  // PIDController_Stop();
+
+  PIDController_SetDirection(PIDController_SPINRIGHT);
 
   while(1)
   {

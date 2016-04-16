@@ -99,7 +99,7 @@ void Proximity_Task(void const * argument)
       else if(adcValue < 2000)
       {
         UltraSonic_Enabled = 1;
-        Servo_SetPosition(0);
+        // Servo_SetPosition(0);
       }
     }
     osDelay(50);
@@ -120,8 +120,15 @@ void TIM1_BRK_TIM15_IRQHandler(void)
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
   volatile uint32_t captureValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+
+  // found a stair
   if(captureValue > UltraSonic_Threshold)
   {
     Servo_SetPosition(50);
+    return;
   }
+
+  // found a wall so turn around
+  PIDController_SetDirection(PIDController_SPINRIGHT);
+
 }
