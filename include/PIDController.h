@@ -10,6 +10,7 @@
 
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
+#include "tim.h"
 
 #define PIDController_AUTOMATIC 1
 #define PIDController_MANUAL 0
@@ -56,14 +57,13 @@ uint8_t SampleTime;
 // if it is included here
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
 
-void MX_TIM1_Init(void);
-void MX_TIM2_Init(void);
-void MX_TIM3_Init(void);
 void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig);
 void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig);
 void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode);
 void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig);
+void PIDController_SetDirection(int direction);
 void PIDController_Stop();
+void PIDController_Start();
 void PIDController_Init(void);
 void PIDController_Register(void);
 void PIDController_Task(void const * argument);

@@ -11,96 +11,6 @@
 // This also controls the delay in the task
 uint8_t SampleTime = 100;
 
-/* TIM1 init function */
-void MX_TIM1_Init(void)
-{
-
-  TIM_SlaveConfigTypeDef sSlaveConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
-
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  HAL_TIM_Base_Init(&htim1);
-
-  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
-  sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
-  sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_BOTHEDGE;
-  sSlaveConfig.TriggerFilter = 0;
-  HAL_TIM_SlaveConfigSynchronization(&htim1, &sSlaveConfig);
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig);
-
-}
-
-/* TIM2 init function */
-void MX_TIM2_Init(void)
-{
-
-  TIM_SlaveConfigTypeDef sSlaveConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
-
-  htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
-  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 65535;
-  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  HAL_TIM_Base_Init(&htim2);
-
-  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
-  sSlaveConfig.InputTrigger = TIM_TS_TI1FP1;
-  sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_BOTHEDGE;
-  sSlaveConfig.TriggerFilter = 0;
-  HAL_TIM_SlaveConfigSynchronization(&htim2, &sSlaveConfig);
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
-
-}
-
-/* TIM3 init function */
-void MX_TIM3_Init(void)
-{
-
-  TIM_ClockConfigTypeDef sClockSourceConfig;
-  TIM_MasterConfigTypeDef sMasterConfig;
-  TIM_OC_InitTypeDef sConfigOC;
-
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 2;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 20000;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  HAL_TIM_Base_Init(&htim3);
-
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig);
-
-  HAL_TIM_PWM_Init(&htim3);
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig);
-
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
-
-  HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2);
-
-  HAL_TIM_MspPostInit(&htim3);
-
-}
-
 void PIDController_SetCounterMode(TIM_HandleTypeDef *htim, uint32_t CounterMode)
 {
   assert_param(IS_TIM_INSTANCE(htim->Instance));
@@ -210,12 +120,10 @@ void PIDController_Stop()
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
 }
 
-void PIDController_Start(int withPID)
+void PIDController_Start()
 {
-  if(withPID == 1)
-  {
-
-  }
+  PIDController_ControllerSetMode(&tim1Config, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&tim2Config, PIDController_AUTOMATIC);
 }
 
 void PIDController_SetDirection(int direction)
@@ -289,9 +197,12 @@ void PIDController_SetDirection(int direction)
 
 void PIDController_Init(void)
 {
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
+  HAL_TIM_Base_Start(&htim1);
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+
   PIDController_ControllerSetMode(&tim1Config, PIDController_AUTOMATIC);
   PIDController_ControllerSetMode(&tim2Config, PIDController_AUTOMATIC);
 }
@@ -304,12 +215,6 @@ void PIDController_Register(void)
 
 void PIDController_Task(void const * argument)
 {
-  HAL_TIM_Base_Start(&htim1);
-  HAL_TIM_Base_Start(&htim2);
-  HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-
   tim1Config.Ki = 1000;
   tim1Config.Kp = 400;
   tim1Config.Kd = 50;
@@ -321,7 +226,7 @@ void PIDController_Task(void const * argument)
   tim1Config.Last = 0;
   tim1Config.LastInput = 0;
   tim1Config.ITerm = 0;
-  tim1Config.InAuto = PIDController_AUTOMATIC;
+  tim1Config.InAuto = PIDController_MANUAL;
 
   tim2Config.Ki = 1000;
   tim2Config.Kp = 400;
@@ -334,7 +239,7 @@ void PIDController_Task(void const * argument)
   tim2Config.Last = 0;
   tim2Config.LastInput = 0;
   tim2Config.ITerm = 0;
-  tim2Config.InAuto = PIDController_AUTOMATIC;
+  tim2Config.InAuto = PIDController_MANUAL;
 
   int32_t leftEncoderCount, rightEncoderCount;
 
@@ -345,31 +250,54 @@ void PIDController_Task(void const * argument)
   // PIDController_SetDirection(PIDController_STOP);
   // PIDController_Stop();
 
-  PIDController_SetDirection(PIDController_SPINRIGHT);
+  PIDController_SetDirection(PIDController_FORWARD);
+  PIDController_Start();
 
   while(1)
   {
-    leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
-    rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
+    /*
+    if(doSpin)
+    {
+      // Wait for a complete stop
+      osDelay(1000);
 
-    // Calculate how far the wheel as spun since the last interval
-    tim1Config.Input = leftEncoderCount - tim1Config.Last;
-    tim1Config.Last = leftEncoderCount;
+      // found a wall so turn around
+      PIDController_SetDirection(PIDController_SPINRIGHT);
+      PIDController_Start();
 
-    tim2Config.Input = rightEncoderCount - tim2Config.Last;
-    tim2Config.Last = rightEncoderCount;
+      osDelay(2000);
 
-    // Process the variables for the next time around
-    PIDController_ControllerCompute(&tim1Config);
-    PIDController_ControllerCompute(&tim2Config);
+      PIDController_Stop();
+      doSpin = 0;
+    }
+    */
 
     // Update the PWM here to speed up/slow down the motor
     if(tim1Config.InAuto == PIDController_AUTOMATIC)
     {
+      leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
+
+      // Calculate how far the wheel as spun since the last interval
+      tim1Config.Input = leftEncoderCount - tim1Config.Last;
+      tim1Config.Last = leftEncoderCount;
+
+      // Process the variables for the next time around
+      PIDController_ControllerCompute(&tim1Config);
+
       __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
     }
 
-    if(tim2Config.InAuto == PIDController_AUTOMATIC) {
+    if(tim2Config.InAuto == PIDController_AUTOMATIC)
+    {
+      rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
+
+      // Calculate how far the wheel as spun since the last interval
+      tim2Config.Input = rightEncoderCount - tim2Config.Last;
+      tim2Config.Last = rightEncoderCount;
+
+      // Process the variables for the next time around
+      PIDController_ControllerCompute(&tim2Config);
+
       __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
     }
 

@@ -33,11 +33,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
-#include "Proximity.h"
-#include "Heartbeat.h"
-#include "PIDController.h"
-#include "Servo.h"
-#include "MPU6050.h"
+#include "adc.h"
+#include "i2c.h"
+#include "tim.h"
+#include "gpio.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -52,7 +51,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+void MX_FREERTOS_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -60,12 +59,8 @@ static void MX_GPIO_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-/* USER CODE END 0 */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
-#pragma GCC diagnostic ignored "-Wreturn-type"
+/* USER CODE END 0 */
 
 int main(void)
 {
@@ -84,39 +79,20 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_ADC1_Init();
+  MX_I2C1_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM15_Init();
+  MX_TIM16_Init();
 
   /* USER CODE BEGIN 2 */
-  Proximity_Init();
-  Heartbeat_Init();
-  PIDController_Init();
-  Servo_Init();
-  // MPU6050_Init();
+
   /* USER CODE END 2 */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  Proximity_Register();
-  Heartbeat_Register();
-  PIDController_Register();
-  Servo_Register();
-  // MPU6050_Reg();
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
@@ -176,51 +152,9 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
 }
 
-/** Configure pins as 
-        * Analog 
-        * Input 
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
-void MX_GPIO_Init(void)
-{
+/* USER CODE BEGIN 4 */
 
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Motor_2_Dir_1_Pin|Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : Motor_2_Dir_1_Pin */
-  GPIO_InitStruct.Pin = Motor_2_Dir_1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Motor_2_Dir_1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : Ultrasonic_1_Pulse_Pin Heartbeat_LED_Pin Motor_1_Dir_1_Pin Motor_1_Dir_2_Pin */
-  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin|Motor_1_Dir_1_Pin|Motor_1_Dir_2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : Motor_2_Dir_2_Pin */
-  GPIO_InitStruct.Pin = Motor_2_Dir_2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Motor_2_Dir_2_GPIO_Port, &GPIO_InitStruct);
-
-}
+/* USER CODE END 4 */
 
 #ifdef USE_FULL_ASSERT
 
@@ -241,8 +175,6 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 
 #endif
-
-#pragma GCC diagnostic pop
 
 /**
   * @}

@@ -72,6 +72,21 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+* @brief This function handles TIM1 break and TIM15 interrupts.
+*/
+void TIM1_BRK_TIM15_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_BRK_TIM15_IRQn 0 */
+
+  /* USER CODE END TIM1_BRK_TIM15_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
+  HAL_TIM_IRQHandler(&htim15);
+  /* USER CODE BEGIN TIM1_BRK_TIM15_IRQn 1 */
+
+  /* USER CODE END TIM1_BRK_TIM15_IRQn 1 */
+}
+
+/**
 * @brief This function handles TIM6 global and DAC1 underrun error interrupts.
 */
 void TIM6_DAC1_IRQHandler(void)

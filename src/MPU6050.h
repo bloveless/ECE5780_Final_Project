@@ -7,6 +7,7 @@
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
 #include "diag/Trace.h"
+#include "i2c.h"
 
 #ifndef MPU6050_H_
 #define MPU6050_H_
@@ -39,15 +40,9 @@ I2C_HandleTypeDef hi2c1;
 MPU6050_TypeDef rData;
 osThreadId mpu6050TaskHandle;
 
-
-void MX_I2C1_Init(void);
-
 void MPU6050_Init();
-
 void MPU6050_Task();
-
 void MPU6050_Reg();
-
 void MPU6050_Read(MPU6050_TypeDef *rData);
 
 #endif /* MPU6050_H_ */
