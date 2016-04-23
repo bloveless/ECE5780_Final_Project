@@ -1,18 +1,17 @@
 #include "Proximity.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
-uint32_t ADC_Threshold = 1500;///////////////////////////////////////////////////////////
+uint32_t ADC_Threshold = 2000;///////////////////////////////////////////////////////////
 uint32_t UltraSonic_Threshold = 10;
 /////////////////////////////////////////////////////////////////////////////////////////
 
 osThreadId proximityTaskHandle;
-TIM_HandleTypeDef htim15;
-ADC_HandleTypeDef hadc1;
 uint32_t UltraSonic_Enabled = 1;
 
 void Proximity_Init(void)
 {
   HAL_ADC_Start(&hadc1);
+  HAL_TIM_IC_Start_IT(&htim15, TIM_CHANNEL_1);
 }
 
 void Proximity_Task(void const * argument)
@@ -28,12 +27,12 @@ void Proximity_Task(void const * argument)
       {
         UltraSonic_Enabled = 0;
         PIDController_Stop();
-        osDelay(5000);
+        osDelay(1000);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
       }
-      else if(adcValue < 750)
+      else if(adcValue < 1000)
       {
         UltraSonic_Enabled = 1;
         Servo_SetPosition(0);
@@ -49,7 +48,7 @@ void Proximity_Register(void)
   proximityTaskHandle = osThreadCreate(osThread(proximityTask), NULL);
 }
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+void ProcessUltrasonic(TIM_HandleTypeDef *htim)
 {
   volatile uint32_t captureValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 

@@ -10,6 +10,7 @@
 
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
+#include "tim.h"
 
 TIM_HandleTypeDef htim16;
 osThreadId Servo_TaskHandle;
@@ -23,5 +24,6 @@ void Servo_Init(void);
 void Servo_Register(void);
 void Servo_SetPosition(uint8_t position);
 void Servo_Task(void);
+void Handle_PWM(void);
 
 #endif /* SERVO_H_ */

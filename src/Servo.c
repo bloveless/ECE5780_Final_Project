@@ -7,10 +7,17 @@
 
 #include "Servo.h"
 
+uint32_t counter;
+uint16_t scaledPosition;
+uint32_t count;
+
 void Servo_Init()
 {
-  HAL_TIM_Base_Start(&htim16);
-  HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
+  counter = 0;
+  scaledPosition = 5;
+  count = 0;
+
+  HAL_TIM_Base_Start_IT(&htim7);
 }
 
 void Servo_Register()
@@ -31,23 +38,31 @@ uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uin
 void Servo_SetPosition(uint8_t position)
 {
   // Map the position to a valid percentage
-  uint16_t scaledPosition = map(position, 0, 100, 5, 14);
-
-  // Convert the position to a pwmSignal
-  uint16_t pwmPosition = (uint16_t) (htim16.Init.Period * (((float) scaledPosition) / 100));
-  __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, pwmPosition);
+  scaledPosition = map(position, 0, 100, 5, 25);
 }
 
 void Servo_Task()
 {
   // Set the servo to it's natural position
   // this should generate a pulse width of 1.5ms
-  Servo_SetPosition(100);
+  Servo_SetPosition(0);
 
   while(1)
   {
     // servoPosition += 50;
     // __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, servoPosition);
-    osDelay(100);
+    osDelay(1000);
+    scaledPosition++;
   }
+}
+
+void Handle_PWM(void)
+{
+  counter++;
+  if(counter == 200)
+    counter = 0;
+  if(counter < scaledPosition)
+    HAL_GPIO_WritePin(Servo_PWM_GPIO_Port, Servo_PWM_Pin, GPIO_PIN_SET);
+  else
+    HAL_GPIO_WritePin(Servo_PWM_GPIO_Port, Servo_PWM_Pin, GPIO_PIN_RESET);
 }

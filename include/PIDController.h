@@ -46,8 +46,8 @@ osThreadId PIDController_pidControllerTaskHandle;
 uint32_t PIDController_leftEncoderCount;
 uint32_t PIDController_rightEncoderCount;
 
-PIDController_Config tim1Config;
-PIDController_Config tim2Config;
+PIDController_Config tim16Config;
+PIDController_Config tim17Config;
 
 // Default sample time is .1 seconds
 // This also controls the delay in the task

@@ -35,6 +35,7 @@
 #include "stm32f3xx.h"
 #include "stm32f3xx_it.h"
 #include "cmsis_os.h"
+#include "Servo.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -42,6 +43,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim7;
 extern TIM_HandleTypeDef htim15;
 
 extern TIM_HandleTypeDef htim6;
@@ -77,7 +79,7 @@ void SysTick_Handler(void)
 void TIM1_BRK_TIM15_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_BRK_TIM15_IRQn 0 */
-
+  ProcessUltrasonic(&htim15);
   /* USER CODE END TIM1_BRK_TIM15_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   HAL_TIM_IRQHandler(&htim15);
@@ -98,6 +100,20 @@ void TIM6_DAC1_IRQHandler(void)
   /* USER CODE BEGIN TIM6_DAC1_IRQn 1 */
 
   /* USER CODE END TIM6_DAC1_IRQn 1 */
+}
+
+/**
+* @brief This function handles TIM7 global and DAC2 underrun error interrupts.
+*/
+void TIM7_DAC2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_DAC2_IRQn 0 */
+  Handle_PWM();
+  /* USER CODE END TIM7_DAC2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim7);
+  /* USER CODE BEGIN TIM7_DAC2_IRQn 1 */
+
+  /* USER CODE END TIM7_DAC2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

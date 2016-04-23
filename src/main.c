@@ -82,10 +82,11 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
-  MX_TIM3_Init();
   MX_ADC1_Init();
   MX_TIM15_Init();
   MX_TIM16_Init();
+  MX_TIM7_Init();
+  MX_TIM17_Init();
 
   /* USER CODE BEGIN 2 */
 

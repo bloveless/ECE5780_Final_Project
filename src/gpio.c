@@ -51,7 +51,6 @@
         * Output
         * EVENT_OUT
         * EXTI
-     PA15   ------> USART2_RX
 */
 void MX_GPIO_Init(void)
 {
@@ -64,22 +63,31 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Servo_PWM_Pin|MPU6050_Status_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PBPin PBPin */
-  GPIO_InitStruct.Pin = Ultrasonic_1_Pulse_Pin|Heartbeat_LED_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, Left_Motor_Dir_2_Pin|Heartbeat_LED_Pin|Left_Motor_Dir_1_Pin|Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = Servo_PWM_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(Servo_PWM_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
+  GPIO_InitStruct.Pin = Left_Motor_Dir_2_Pin|Heartbeat_LED_Pin|Left_Motor_Dir_1_Pin|Ultrasonic_1_Pulse_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = VCP_RX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-  HAL_GPIO_Init(VCP_RX_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = MPU6050_Status_LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(MPU6050_Status_LED_GPIO_Port, &GPIO_InitStruct);
 
 }
 

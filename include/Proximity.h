@@ -3,6 +3,8 @@
 
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
+#include "adc.h"
+#include "tim.h"
 #include "Servo.h"
 #include "PIDController.h"
 

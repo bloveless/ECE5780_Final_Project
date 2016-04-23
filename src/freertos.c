@@ -35,8 +35,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
+#include "Heartbeat.h"
 #include "MPU6050.h"
 #include "PIDController.h"
+#include "Proximity.h"
 #include "Servo.h"
 
 /* USER CODE BEGIN Includes */     
@@ -44,8 +46,6 @@
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
-osThreadId defaultTaskHandle;
-
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
@@ -67,6 +67,7 @@ void MX_FREERTOS_Init(void) {
   MPU6050_Init();
   PIDController_Init();
   Servo_Init();
+  Proximity_Init();
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -82,11 +83,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
   Heartbeat_Register();
   MPU6050_Reg();
   PIDController_Register();
   Servo_Register();
+  Proximity_Register();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
