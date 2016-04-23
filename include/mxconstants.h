@@ -44,6 +44,8 @@
 #define Ultrasonic_1_Echo_GPIO_Port GPIOA
 #define Left_Track_Encoder_Pin GPIO_PIN_6
 #define Left_Track_Encoder_GPIO_Port GPIOA
+#define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
+#define Ultrasonic_1_Pulse_GPIO_Port GPIOB
 #define IR_ADC_Pin GPIO_PIN_1
 #define IR_ADC_GPIO_Port GPIOB
 #define SWDIO_Pin GPIO_PIN_13
@@ -52,6 +54,8 @@
 #define SWCLK_GPIO_Port GPIOA
 #define VCP_RX_Pin GPIO_PIN_15
 #define VCP_RX_GPIO_Port GPIOA
+#define Heartbeat_LED_Pin GPIO_PIN_3
+#define Heartbeat_LED_GPIO_Port GPIOB
 #define Accel_SCL_Pin GPIO_PIN_6
 #define Accel_SCL_GPIO_Port GPIOB
 #define Accel_SDA_Pin GPIO_PIN_7

@@ -63,6 +63,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  Heartbeat_Init();
   MPU6050_Init();
   PIDController_Init();
   Servo_Init();
@@ -82,6 +83,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
+  Heartbeat_Register();
   MPU6050_Reg();
   PIDController_Register();
   Servo_Register();
