@@ -38,32 +38,20 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define Right_Track_Encoder_Pin GPIO_PIN_0
-#define Right_Track_Encoder_GPIO_Port GPIOA
+#define MCO_Pin GPIO_PIN_0
+#define MCO_GPIO_Port GPIOF
 #define Ultrasonic_1_Echo_Pin GPIO_PIN_2
 #define Ultrasonic_1_Echo_GPIO_Port GPIOA
-#define Motor_2_Dir_1_Pin GPIO_PIN_3
-#define Motor_2_Dir_1_GPIO_Port GPIOA
-#define Motor_2_Enable_Pin GPIO_PIN_4
-#define Motor_2_Enable_GPIO_Port GPIOA
-#define Motor_1_Enable_Pin GPIO_PIN_6
-#define Motor_1_Enable_GPIO_Port GPIOA
-#define Ultrasonic_1_Pulse_Pin GPIO_PIN_0
-#define Ultrasonic_1_Pulse_GPIO_Port GPIOB
+#define Left_Track_Encoder_Pin GPIO_PIN_6
+#define Left_Track_Encoder_GPIO_Port GPIOA
 #define IR_ADC_Pin GPIO_PIN_1
 #define IR_ADC_GPIO_Port GPIOB
-#define Left_Track_Encoder_Pin GPIO_PIN_8
-#define Left_Track_Encoder_GPIO_Port GPIOA
-#define Motor_2_Dir_2_Pin GPIO_PIN_10
-#define Motor_2_Dir_2_GPIO_Port GPIOA
-#define Servo_Pin GPIO_PIN_12
-#define Servo_GPIO_Port GPIOA
-#define Heartbeat_LED_Pin GPIO_PIN_3
-#define Heartbeat_LED_GPIO_Port GPIOB
-#define Motor_1_Dir_1_Pin GPIO_PIN_4
-#define Motor_1_Dir_1_GPIO_Port GPIOB
-#define Motor_1_Dir_2_Pin GPIO_PIN_5
-#define Motor_1_Dir_2_GPIO_Port GPIOB
+#define SWDIO_Pin GPIO_PIN_13
+#define SWDIO_GPIO_Port GPIOA
+#define SWCLK_Pin GPIO_PIN_14
+#define SWCLK_GPIO_Port GPIOA
+#define VCP_RX_Pin GPIO_PIN_15
+#define VCP_RX_GPIO_Port GPIOA
 #define Accel_SCL_Pin GPIO_PIN_6
 #define Accel_SCL_GPIO_Port GPIOB
 #define Accel_SDA_Pin GPIO_PIN_7

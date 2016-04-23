@@ -22,7 +22,7 @@
 //uint8_t aTxBuffer[] = "Hello World";
 //#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
 
-#define TRACE_I2C_DEBUG
+// #define TRACE_I2C_DEBUG
 
 typedef struct
 {

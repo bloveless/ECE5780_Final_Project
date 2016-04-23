@@ -116,8 +116,8 @@ void PIDController_Stop()
   PIDController_ControllerSetMode(&tim2Config, PIDController_MANUAL);
 
   // And stop the motors
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 }
 
 void PIDController_Start()
@@ -128,6 +128,7 @@ void PIDController_Start()
 
 void PIDController_SetDirection(int direction)
 {
+  /*
   if(direction == PIDController_STOP)
   {
     HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
@@ -193,6 +194,7 @@ void PIDController_SetDirection(int direction)
 
     return;
   }
+  */
 }
 
 void PIDController_Init(void)
@@ -200,8 +202,8 @@ void PIDController_Init(void)
   HAL_TIM_Base_Start(&htim1);
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 
   PIDController_ControllerSetMode(&tim1Config, PIDController_AUTOMATIC);
   PIDController_ControllerSetMode(&tim2Config, PIDController_AUTOMATIC);
@@ -241,7 +243,7 @@ void PIDController_Task(void const * argument)
   tim2Config.ITerm = 0;
   tim2Config.InAuto = PIDController_MANUAL;
 
-  int32_t leftEncoderCount, rightEncoderCount;
+  volatile int32_t leftEncoderCount, rightEncoderCount;
 
   // Wait for 5 seconds before we begin
   osDelay(5000);
@@ -275,7 +277,7 @@ void PIDController_Task(void const * argument)
     // Update the PWM here to speed up/slow down the motor
     if(tim1Config.InAuto == PIDController_AUTOMATIC)
     {
-      leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
+      leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim3);
 
       // Calculate how far the wheel as spun since the last interval
       tim1Config.Input = leftEncoderCount - tim1Config.Last;
@@ -284,7 +286,7 @@ void PIDController_Task(void const * argument)
       // Process the variables for the next time around
       PIDController_ControllerCompute(&tim1Config);
 
-      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, (uint32_t) tim1Config.Output);
     }
 
     if(tim2Config.InAuto == PIDController_AUTOMATIC)
@@ -298,7 +300,7 @@ void PIDController_Task(void const * argument)
       // Process the variables for the next time around
       PIDController_ControllerCompute(&tim2Config);
 
-      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t) tim2Config.Output);
     }
 
     osDelay(SampleTime);

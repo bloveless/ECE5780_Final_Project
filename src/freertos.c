@@ -35,6 +35,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
+#include "MPU6050.h"
+#include "PIDController.h"
+#include "Servo.h"
 
 /* USER CODE BEGIN Includes */     
 
@@ -60,9 +63,8 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-  PIDController_Init();
   MPU6050_Init();
-  Proximity_Init();
+  PIDController_Init();
   Servo_Init();
   /* USER CODE END Init */
 
@@ -80,9 +82,8 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  PIDController_Register();
   MPU6050_Reg();
-  Proximity_Register();
+  PIDController_Register();
   Servo_Register();
 
   /* USER CODE BEGIN RTOS_THREADS */

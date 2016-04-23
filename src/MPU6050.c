@@ -75,6 +75,9 @@ void MPU6050_Reg(){
 void MPU6050_Task(){
 	while(1) {
 		MPU6050_Read(&rData);
+    trace_printf("AccelX:\t\t%d\r", rData.AccelX/16);
+    trace_printf("Temperature:\t%d\r", rData.Temperature);
+		osDelay(1000);
 	}
 }
 
