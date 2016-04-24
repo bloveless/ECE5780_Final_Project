@@ -17,11 +17,7 @@
 
 #define PIDController_STOP 1
 #define PIDController_FORWARD 2
-#define PIDController_REVERSE 3
-#define PIDController_LEFT 4
-#define PIDController_RIGHT 5
-#define PIDController_SPINLEFT 6
-#define PIDController_SPINRIGHT 7
+#define PIDController_SPIN 3
 
 typedef struct {
     uint8_t InAuto;
@@ -46,8 +42,8 @@ osThreadId PIDController_pidControllerTaskHandle;
 uint32_t PIDController_leftEncoderCount;
 uint32_t PIDController_rightEncoderCount;
 
-PIDController_Config tim16Config;
-PIDController_Config tim17Config;
+PIDController_Config leftTrackConfig;
+PIDController_Config rightTrackConfig;
 
 // Default sample time is .1 seconds
 // This also controls the delay in the task

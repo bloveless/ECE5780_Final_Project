@@ -52,7 +52,7 @@ void Servo_Task()
     // servoPosition += 50;
     // __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, servoPosition);
     osDelay(1000);
-    scaledPosition++;
+    // scaledPosition++;
   }
 }
 

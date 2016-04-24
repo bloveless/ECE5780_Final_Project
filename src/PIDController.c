@@ -112,89 +112,32 @@ void PIDController_ControllerReInitialize(PIDController_Config* pidControllerCon
 void PIDController_Stop()
 {
   // Disable the PIDController
-  PIDController_ControllerSetMode(&tim16Config, PIDController_MANUAL);
-  PIDController_ControllerSetMode(&tim17Config, PIDController_MANUAL);
+  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_MANUAL);
+  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_MANUAL);
 
   // And stop the motors
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+  __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);
 }
 
 void PIDController_Start()
 {
-  PIDController_ControllerSetMode(&tim16Config, PIDController_AUTOMATIC);
-  PIDController_ControllerSetMode(&tim17Config, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
 }
 
 void PIDController_SetDirection(int direction)
 {
-  /*
-  if(direction == PIDController_STOP)
-  {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-
-    return;
-  }
-
   if(direction == PIDController_FORWARD)
   {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-
-    return;
+    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_RESET);
   }
-
-  if(direction == PIDController_LEFT)
+  if(direction == PIDController_SPIN)
   {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-    return;
+    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_SET);
   }
-
-  if(direction == PIDController_RIGHT)
-  {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-
-    return;
-  }
-
-  // ES NO BUENO
-  if(direction == PIDController_SPINLEFT)
-  {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_SET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_RESET);
-
-    return;
-  }
-
-  if(direction == PIDController_SPINRIGHT)
-  {
-    HAL_GPIO_WritePin(Motor_1_Dir_1_GPIO_Port, Motor_1_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Motor_1_Dir_2_GPIO_Port, Motor_1_Dir_2_Pin, GPIO_PIN_RESET);
-
-    HAL_GPIO_WritePin(Motor_2_Dir_1_GPIO_Port, Motor_2_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Motor_2_Dir_2_GPIO_Port, Motor_2_Dir_2_Pin, GPIO_PIN_SET);
-
-    return;
-  }
-  */
 }
 
 void PIDController_Init(void)
@@ -209,8 +152,8 @@ void PIDController_Init(void)
   HAL_TIM_Base_Start(&htim17);
   HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
 
-  PIDController_ControllerSetMode(&tim16Config, PIDController_AUTOMATIC);
-  PIDController_ControllerSetMode(&tim17Config, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
 }
 
 void PIDController_Register(void)
@@ -221,31 +164,31 @@ void PIDController_Register(void)
 
 void PIDController_Task(void const * argument)
 {
-  tim16Config.Ki = 1000;
-  tim16Config.Kp = 400;
-  tim16Config.Kd = 50;
-  tim16Config.Input = 0;
-  tim16Config.Output = 0;
-  tim16Config.Goal = 3;
-  tim16Config.OutMin = 0;
-  tim16Config.OutMax = 20000;
-  tim16Config.Last = 0;
-  tim16Config.LastInput = 0;
-  tim16Config.ITerm = 0;
-  tim16Config.InAuto = PIDController_MANUAL;
+  leftTrackConfig.Ki = 1000;
+  leftTrackConfig.Kp = 400;
+  leftTrackConfig.Kd = 50;
+  leftTrackConfig.Input = 0;
+  leftTrackConfig.Output = 0;
+  leftTrackConfig.Goal = 3;
+  leftTrackConfig.OutMin = 0;
+  leftTrackConfig.OutMax = 65535;
+  leftTrackConfig.Last = 0;
+  leftTrackConfig.LastInput = 0;
+  leftTrackConfig.ITerm = 0;
+  leftTrackConfig.InAuto = PIDController_MANUAL;
 
-  tim17Config.Ki = 1000;
-  tim17Config.Kp = 400;
-  tim17Config.Kd = 50;
-  tim17Config.Input = 0;
-  tim17Config.Output = 0;
-  tim17Config.Goal = 3;
-  tim17Config.OutMin = 0;
-  tim17Config.OutMax = 20000;
-  tim17Config.Last = 0;
-  tim17Config.LastInput = 0;
-  tim17Config.ITerm = 0;
-  tim17Config.InAuto = PIDController_MANUAL;
+  rightTrackConfig.Ki = 1000;
+  rightTrackConfig.Kp = 400;
+  rightTrackConfig.Kd = 50;
+  rightTrackConfig.Input = 0;
+  rightTrackConfig.Output = 0;
+  rightTrackConfig.Goal = 3;
+  rightTrackConfig.OutMin = 0;
+  rightTrackConfig.OutMax = 65535;
+  rightTrackConfig.Last = 0;
+  rightTrackConfig.LastInput = 0;
+  rightTrackConfig.ITerm = 0;
+  rightTrackConfig.InAuto = PIDController_MANUAL;
 
   volatile int32_t leftEncoderCount = 0;
   volatile int32_t rightEncoderCount = 0;
@@ -280,32 +223,32 @@ void PIDController_Task(void const * argument)
     */
 
     // Update the PWM here to speed up/slow down the motor
-    if(tim16Config.InAuto == PIDController_AUTOMATIC)
+    if(rightTrackConfig.InAuto == PIDController_AUTOMATIC)
     {
-      rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
+      rightEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
 
       // Calculate how far the wheel as spun since the last interval
-      tim16Config.Input = rightEncoderCount - tim16Config.Last;
-      tim16Config.Last = rightEncoderCount;
+      rightTrackConfig.Input = rightEncoderCount - rightTrackConfig.Last;
+      rightTrackConfig.Last = rightEncoderCount;
 
       // Process the variables for the next time around
-      PIDController_ControllerCompute(&tim16Config);
+      PIDController_ControllerCompute(&rightTrackConfig);
 
-      __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, (uint32_t) tim16Config.Output);
+      __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, (uint32_t) rightTrackConfig.Output);
     }
 
-    if(tim17Config.InAuto == PIDController_AUTOMATIC)
+    if(leftTrackConfig.InAuto == PIDController_AUTOMATIC)
     {
-      leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim2);
+      leftEncoderCount = __HAL_TIM_GET_COUNTER(&htim1);
 
       // Calculate how far the wheel as spun since the last interval
-      tim17Config.Input = leftEncoderCount - tim17Config.Last;
-      tim17Config.Last = leftEncoderCount;
+      leftTrackConfig.Input = leftEncoderCount - leftTrackConfig.Last;
+      leftTrackConfig.Last = leftEncoderCount;
 
       // Process the variables for the next time around
-      PIDController_ControllerCompute(&tim17Config);
+      PIDController_ControllerCompute(&leftTrackConfig);
 
-      __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, (uint32_t) tim17Config.Output);
+      __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, (uint32_t) leftTrackConfig.Output);
     }
 
     osDelay(SampleTime);
