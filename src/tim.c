@@ -106,7 +106,7 @@ void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 7;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 500;
+  htim7.Init.Period = 100;
   HAL_TIM_Base_Init(&htim7);
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;

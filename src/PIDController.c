@@ -39,9 +39,11 @@ void PIDController_Task(void const * argument)
 
   uint16_t leftEncoderCount = 0;
   uint16_t rightEncoderCount = 0;
-  uint16_t spinStartCount = 0;
-  uint8_t spinCountThreshold = 16;
-  uint8_t lastMode = PIDController_NORMALMODE;
+  uint16_t leftSpinStartCount = 0;
+  uint8_t leftSpinCountThreshold = 15;
+  uint16_t rightSpinStartCount = 0;
+  uint8_t rightSpinCountThreshold = 13;
+  uint8_t caseIndex = 0;
 
   // Wait for 5 seconds before we begin
   osDelay(5000);
@@ -51,23 +53,6 @@ void PIDController_Task(void const * argument)
 
   while(1)
   {
-    /*
-    if(doSpin)
-    {
-      // Wait for a complete stop
-      osDelay(1000);
-
-      // found a wall so turn around
-      PIDController_SetDirection(PIDController_SPINRIGHT);
-      PIDController_Start();
-
-      osDelay(2000);
-
-      PIDController_Stop();
-      doSpin = 0;
-    }
-    */
-
     // Update the PWM here to speed up/slow down the motor
     if(rightTrackConfig.InAuto == PIDController_AUTOMATIC)
     {
@@ -99,32 +84,39 @@ void PIDController_Task(void const * argument)
 
     if(PIDController_CurrentMode == PIDController_SPINMODE)
     {
-
-      // the first time we land here we will set the tracks for a spin
-      // we assume that the motors are stopped so we start them again
-      if(lastMode == PIDController_NORMALMODE)
+      switch(caseIndex)
       {
-        lastMode = PIDController_SPINMODE;
-        spinStartCount = leftEncoderCount;
-        PIDController_SetDirection(PIDController_SPIN);
-        PIDController_Start();
-        continue;
-      }
-
-      // We stay in this mode until the leftEncoderCount goes past the spin count threshold
-      // Then start driving forward again
-      if((lastMode == PIDController_SPINMODE) &&
-          (leftEncoderCount > (spinStartCount + spinCountThreshold)))
-      {
-        PIDController_Stop();
-        // Allow the bot to come to a complete stop
-        osDelay(1000);
-        // Restart the PID driving forward
-        lastMode = PIDController_NORMALMODE;
-        PIDController_SetMode(PIDController_NORMALMODE);
-        PIDController_SetDirection(PIDController_FORWARD);
-        PIDController_Start();
-        continue;
+        case 0:
+          leftSpinStartCount = leftEncoderCount;
+          rightSpinStartCount = rightEncoderCount;
+          PIDController_SetDirection(PIDController_SPIN);
+          PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
+          PIDController_ControllerSetMode(&rightTrackConfig, PIDController_MANUAL);
+          caseIndex++;
+          break;
+        case 1:
+          if((leftEncoderCount > (leftSpinStartCount + leftSpinCountThreshold)))
+            caseIndex++;
+          break;
+        case 2:
+          PIDController_Stop();
+          PIDController_SetDirection(PIDController_FORWARD);
+          PIDController_ControllerSetMode(&leftTrackConfig, PIDController_MANUAL);
+          PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
+          caseIndex++;
+          break;
+        case 3:
+          if((rightEncoderCount > (rightSpinStartCount + rightSpinCountThreshold)))
+            caseIndex++;
+          break;
+        case 4:
+          PIDController_Stop();
+          // Restart the PID driving forward
+          PIDController_SetMode(PIDController_NORMALMODE);
+          PIDController_SetDirection(PIDController_FORWARD);
+          PIDController_Start();
+          caseIndex = 0;
+          spinning = 0;
       }
     }
 

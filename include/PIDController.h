@@ -11,6 +11,7 @@
 #include "stm32f3xx_hal.h"
 #include "cmsis_os.h"
 #include "tim.h"
+#include "Proximity.h"
 
 #define PIDController_AUTOMATIC 1
 #define PIDController_MANUAL 0

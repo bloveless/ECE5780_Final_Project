@@ -1,8 +1,8 @@
 #include "Proximity.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
-uint32_t ADC_Threshold = 1600;///////////////////////////////////////////////////////////
-uint32_t UltraSonic_Threshold = 10;
+uint32_t ADC_Threshold = 1300;///////////////////////////////////////////////////////////
+uint32_t UltraSonic_Threshold = 15;
 /////////////////////////////////////////////////////////////////////////////////////////
 
 osThreadId proximityTaskHandle;
@@ -10,6 +10,7 @@ uint32_t UltraSonic_Enabled = 1;
 
 void Proximity_Init(void)
 {
+  spinning = 0;
   HAL_ADC_Start(&hadc1);
   HAL_TIM_IC_Start_IT(&htim15, TIM_CHANNEL_1);
 }
@@ -24,7 +25,7 @@ void Proximity_Task(void const * argument)
     if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
     {
       adcValue = HAL_ADC_GetValue(&hadc1);
-      if(adcValue > ADC_Threshold && UltraSonic_Enabled)
+      if(adcValue > ADC_Threshold && UltraSonic_Enabled && !spinning)
       {
         UltraSonic_Enabled = 0;
         PIDController_Stop();
@@ -33,7 +34,7 @@ void Proximity_Task(void const * argument)
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
       }
-      else if(adcValue < (ADC_Threshold - 300))
+      else if(adcValue < (ADC_Threshold - 300) && !spinning)
       {
         UltraSonic_Enabled = 1;
         Servo_SetPosition(0);
@@ -56,10 +57,13 @@ void ProcessUltrasonic(TIM_HandleTypeDef *htim)
   // found a stair
   if(captureValue > UltraSonic_Threshold)
   {
-    Servo_SetPosition(50);
+    Servo_SetPosition(90);
+    PIDController_Start();
+    spinning = 1; ///DON'T LEAVE THIS
     return;
   }
 
   // Tell the PID Controller to execute a spin
   PIDController_SetMode(PIDController_SPINMODE);
+  spinning = 1;
 }

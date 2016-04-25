@@ -8,6 +8,8 @@
 #include "Servo.h"
 #include "PIDController.h"
 
+uint8_t spinning;
+
 void Proximity_Init(void);
 void Proximity_Register(void);
 void Proximity_Task(void const * argument);
