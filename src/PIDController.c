@@ -7,139 +7,6 @@
 
 #include "PIDController.h"
 
-// Default sample time is .1 seconds
-// This also controls the delay in the task
-uint8_t SampleTime = 100;
-
-void PIDController_SetCounterMode(TIM_HandleTypeDef *htim, uint32_t CounterMode)
-{
-  assert_param(IS_TIM_INSTANCE(htim->Instance));
-  assert_param(IS_TIM_COUNTER_MODE(CounterMode));
-
-  // The timer forgets it's current count when changing modes
-  // so save the current counter, then change the mode, then
-  // reset the counter
-  uint32_t currentCounterValue = __HAL_TIM_GET_COUNTER(htim);
-  htim->Init.CounterMode = CounterMode;
-  HAL_TIM_Base_Init(htim);
-  __HAL_TIM_SET_COUNTER(htim, currentCounterValue);
-}
-
-// Completely based on https://github.com/br3ttb/Arduino-PID-Library
-void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig)
-{
-  // If we are in manual mode then just move along
-  if(!(pidControllerConfig->InAuto)) return;
-
-  // The task will make sure this is run every SampleTime(ms)
-  // no need to do it here
-
-  /*Compute all the working error variables*/
-  volatile float input = pidControllerConfig->Input;
-  volatile float error = pidControllerConfig->Goal - input;
-  pidControllerConfig->ITerm += (pidControllerConfig->Ki * error);
-
-  /* Make sure the ITerm is within the OutMin and OutMax limits */
-  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax)
-  {
-    pidControllerConfig->ITerm= pidControllerConfig->OutMax;
-  }
-  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin)
-  {
-    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
-  }
-
-  volatile float dInput = (input - pidControllerConfig->LastInput);
-
-  /*Compute PID Output*/
-  volatile float output = pidControllerConfig->Kp * error
-      + pidControllerConfig->ITerm
-      - pidControllerConfig->Kd * dInput;
-
-  if(output > pidControllerConfig->OutMax) {
-    output = pidControllerConfig->OutMax;
-  }
-  else if(output < pidControllerConfig->OutMin) {
-    output = pidControllerConfig->OutMin;
-  }
-  pidControllerConfig->Output = output;
-
-  /*Remember some variables for next time*/
-  pidControllerConfig->LastInput = input;
-}
-
-/**
-void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig)
-{
-  if ((pidControllerConfig->Kp < 0)
-      || (pidControllerConfig->Ki < 0)
-      || (pidControllerConfig->Kd<0)) {
-    return;
-  }
-
-  float SampleTimeInSec = ((float)SampleTime)/1000;
-
-  pidControllerConfig->Ki = pidControllerConfig->Ki * SampleTimeInSec;
-  pidControllerConfig->Kd = pidControllerConfig->Kd / SampleTimeInSec;
-}
-**/
-
-void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode)
-{
-  uint8_t newAuto = (Mode == PIDController_AUTOMATIC);
-
-  if(newAuto == !pidControllerConfig->InAuto)
-  {
-    /*we just went from manual to auto*/
-    PIDController_ControllerReInitialize(pidControllerConfig);
-  }
-  pidControllerConfig->InAuto = newAuto;
-}
-
-void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig)
-{
-  pidControllerConfig->ITerm = pidControllerConfig->Output;
-  pidControllerConfig->LastInput = pidControllerConfig->Input;
-
-  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax) {
-    pidControllerConfig->ITerm = pidControllerConfig->OutMax;
-  }
-  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin) {
-    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
-  }
-}
-
-void PIDController_Stop()
-{
-  // Disable the PIDController
-  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_MANUAL);
-  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_MANUAL);
-
-  // And stop the motors
-  __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 0);
-  __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);
-}
-
-void PIDController_Start()
-{
-  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
-  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
-}
-
-void PIDController_SetDirection(int direction)
-{
-  if(direction == PIDController_FORWARD)
-  {
-    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_RESET);
-  }
-  if(direction == PIDController_SPIN)
-  {
-    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_SET);
-  }
-}
-
 void PIDController_Init(void)
 {
   HAL_TIM_Base_Start(&htim1);
@@ -154,6 +21,9 @@ void PIDController_Init(void)
 
   PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
   PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
+
+  SampleTime = 100;
+  PIDController_CurrentMode = PIDController_NORMALMODE;
 }
 
 void PIDController_Register(void)
@@ -164,41 +34,17 @@ void PIDController_Register(void)
 
 void PIDController_Task(void const * argument)
 {
-  leftTrackConfig.Ki = 1000;
-  leftTrackConfig.Kp = 400;
-  leftTrackConfig.Kd = 50;
-  leftTrackConfig.Input = 0;
-  leftTrackConfig.Output = 0;
-  leftTrackConfig.Goal = 3;
-  leftTrackConfig.OutMin = 0;
-  leftTrackConfig.OutMax = 65535;
-  leftTrackConfig.Last = 0;
-  leftTrackConfig.LastInput = 0;
-  leftTrackConfig.ITerm = 0;
-  leftTrackConfig.InAuto = PIDController_MANUAL;
+  PIDController_ControllerReset(&leftTrackConfig);
+  PIDController_ControllerReset(&rightTrackConfig);
 
-  rightTrackConfig.Ki = 1000;
-  rightTrackConfig.Kp = 400;
-  rightTrackConfig.Kd = 50;
-  rightTrackConfig.Input = 0;
-  rightTrackConfig.Output = 0;
-  rightTrackConfig.Goal = 3;
-  rightTrackConfig.OutMin = 0;
-  rightTrackConfig.OutMax = 65535;
-  rightTrackConfig.Last = 0;
-  rightTrackConfig.LastInput = 0;
-  rightTrackConfig.ITerm = 0;
-  rightTrackConfig.InAuto = PIDController_MANUAL;
-
-  volatile int32_t leftEncoderCount = 0;
-  volatile int32_t rightEncoderCount = 0;
+  uint16_t leftEncoderCount = 0;
+  uint16_t rightEncoderCount = 0;
+  uint16_t spinStartCount = 0;
+  uint8_t spinCountThreshold = 16;
+  uint8_t lastMode = PIDController_NORMALMODE;
 
   // Wait for 5 seconds before we begin
   osDelay(5000);
-
-  // Set the motors to stay stopped
-  // PIDController_SetDirection(PIDController_STOP);
-  // PIDController_Stop();
 
   PIDController_SetDirection(PIDController_FORWARD);
   PIDController_Start();
@@ -251,24 +97,170 @@ void PIDController_Task(void const * argument)
       __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, (uint32_t) leftTrackConfig.Output);
     }
 
+    if(PIDController_CurrentMode == PIDController_SPINMODE)
+    {
+
+      // the first time we land here we will set the tracks for a spin
+      // we assume that the motors are stopped so we start them again
+      if(lastMode == PIDController_NORMALMODE)
+      {
+        lastMode = PIDController_SPINMODE;
+        spinStartCount = leftEncoderCount;
+        PIDController_SetDirection(PIDController_SPIN);
+        PIDController_Start();
+        continue;
+      }
+
+      // We stay in this mode until the leftEncoderCount goes past the spin count threshold
+      // Then start driving forward again
+      if((lastMode == PIDController_SPINMODE) &&
+          (leftEncoderCount > (spinStartCount + spinCountThreshold)))
+      {
+        PIDController_Stop();
+        // Allow the bot to come to a complete stop
+        osDelay(1000);
+        // Restart the PID driving forward
+        lastMode = PIDController_NORMALMODE;
+        PIDController_SetMode(PIDController_NORMALMODE);
+        PIDController_SetDirection(PIDController_FORWARD);
+        PIDController_Start();
+        continue;
+      }
+    }
+
     osDelay(SampleTime);
   }
 }
 
-// This is the code to change the counter direction when the motor changes directions
-// I needed it out of the way while I work on the PID controller
-#if false
+void PIDController_Stop()
+{
+  // Disable the PIDController
+  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_MANUAL);
+  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_MANUAL);
 
-    // If the pin is low then we will count up
-    if(HAL_GPIO_ReadPin(Counter_Direction_GPIO_Port, Counter_Direction_Pin) == GPIO_PIN_RESET)
-    {
-      PIDController_SetCounterMode(&PIDController_htim1, TIM_COUNTERMODE_UP);
-      PIDController_SetCounterMode(&PIDController_htim2, TIM_COUNTERMODE_UP);
-    }
-    // If the pin is high then we will count down
-    else {
-      PIDController_SetCounterMode(&PIDController_htim1, TIM_COUNTERMODE_DOWN);
-      PIDController_SetCounterMode(&PIDController_htim2, TIM_COUNTERMODE_DOWN);
-    }
+  // And stop the motors
+  __HAL_TIM_SET_COMPARE(&htim16, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);
 
-#endif
+  // Also reset the PIDController since it will be starting from a stop
+  PIDController_ControllerReset(&leftTrackConfig);
+  PIDController_ControllerReset(&rightTrackConfig);
+}
+
+void PIDController_Start()
+{
+  PIDController_ControllerSetMode(&leftTrackConfig, PIDController_AUTOMATIC);
+  PIDController_ControllerSetMode(&rightTrackConfig, PIDController_AUTOMATIC);
+}
+
+
+void PIDController_SetMode(uint8_t newMode)
+{
+  PIDController_CurrentMode = newMode;
+}
+
+void PIDController_NormalMode()
+{
+}
+
+void PIDController_SetDirection(int direction)
+{
+  if(direction == PIDController_FORWARD)
+  {
+    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_RESET);
+  }
+  if(direction == PIDController_SPIN)
+  {
+    HAL_GPIO_WritePin(Left_Motor_Dir_1_GPIO_Port, Left_Motor_Dir_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Left_Motor_Dir_2_GPIO_Port, Left_Motor_Dir_2_Pin, GPIO_PIN_SET);
+  }
+}
+
+/******************
+ * These are the actual PID methods
+ ******************/
+
+void PIDController_ControllerReset(PIDController_Config *controllerConfig)
+{
+  controllerConfig->Ki = 1000;
+  controllerConfig->Kp = 400;
+  controllerConfig->Kd = 50;
+  controllerConfig->Input = 0;
+  controllerConfig->Output = 0;
+  controllerConfig->Goal = 3;
+  controllerConfig->OutMin = 0;
+  controllerConfig->OutMax = 65535;
+  controllerConfig->Last = 0;
+  controllerConfig->LastInput = 0;
+  controllerConfig->ITerm = 0;
+  controllerConfig->InAuto = PIDController_MANUAL;
+}
+
+// Completely based on https://github.com/br3ttb/Arduino-PID-Library
+void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig)
+{
+  // If we are in manual mode then just move along
+  if(!(pidControllerConfig->InAuto)) return;
+
+  // The task will make sure this is run every SampleTime(ms)
+  // no need to do it here
+
+  /*Compute all the working error variables*/
+  volatile float input = pidControllerConfig->Input;
+  volatile float error = pidControllerConfig->Goal - input;
+  pidControllerConfig->ITerm += (pidControllerConfig->Ki * error);
+
+  /* Make sure the ITerm is within the OutMin and OutMax limits */
+  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax)
+  {
+    pidControllerConfig->ITerm= pidControllerConfig->OutMax;
+  }
+  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin)
+  {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
+  }
+
+  volatile float dInput = (input - pidControllerConfig->LastInput);
+
+  /*Compute PID Output*/
+  volatile float output = pidControllerConfig->Kp * error
+      + pidControllerConfig->ITerm
+      - pidControllerConfig->Kd * dInput;
+
+  if(output > pidControllerConfig->OutMax) {
+    output = pidControllerConfig->OutMax;
+  }
+  else if(output < pidControllerConfig->OutMin) {
+    output = pidControllerConfig->OutMin;
+  }
+  pidControllerConfig->Output = output;
+
+  /*Remember some variables for next time*/
+  pidControllerConfig->LastInput = input;
+}
+
+void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode)
+{
+  uint8_t newAuto = (Mode == PIDController_AUTOMATIC);
+
+  if(newAuto == !pidControllerConfig->InAuto)
+  {
+    /*we just went from manual to auto*/
+    PIDController_ControllerReInitialize(pidControllerConfig);
+  }
+  pidControllerConfig->InAuto = newAuto;
+}
+
+void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig)
+{
+  pidControllerConfig->ITerm = pidControllerConfig->Output;
+  pidControllerConfig->LastInput = pidControllerConfig->Input;
+
+  if(pidControllerConfig->ITerm > pidControllerConfig->OutMax) {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMax;
+  }
+  else if(pidControllerConfig->ITerm < pidControllerConfig->OutMin) {
+    pidControllerConfig->ITerm = pidControllerConfig->OutMin;
+  }
+}

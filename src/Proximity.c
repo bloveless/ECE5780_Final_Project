@@ -1,7 +1,7 @@
 #include "Proximity.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
-uint32_t ADC_Threshold = 1800;///////////////////////////////////////////////////////////
+uint32_t ADC_Threshold = 1600;///////////////////////////////////////////////////////////
 uint32_t UltraSonic_Threshold = 10;
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,10 +19,6 @@ void Proximity_Task(void const * argument)
   volatile uint32_t adcValue = 0;
   uint32_t UltraSonic_Enabled = 1;
 
-  // Give the ADC time to start up
-  // otherwise we get false positives
-  osDelay(1000);
-
   for(;;)
   {
     if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
@@ -32,12 +28,10 @@ void Proximity_Task(void const * argument)
       {
         UltraSonic_Enabled = 0;
         PIDController_Stop();
-        /*
         osDelay(1000);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
         osDelay(1);
         HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
-        */
       }
       else if(adcValue < (ADC_Threshold - 300))
       {
@@ -66,7 +60,6 @@ void ProcessUltrasonic(TIM_HandleTypeDef *htim)
     return;
   }
 
-  // found a wall so turn around
-  PIDController_SetDirection(PIDController_SPIN);
-  PIDController_Start();
+  // Tell the PID Controller to execute a spin
+  PIDController_SetMode(PIDController_SPINMODE);
 }

@@ -19,6 +19,15 @@
 #define PIDController_FORWARD 2
 #define PIDController_SPIN 3
 
+#define PIDController_NORMALMODE 0
+#define PIDController_SPINMODE 1
+
+uint8_t PIDController_CurrentMode;
+
+// Default sample time is .1 seconds
+// This also controls the delay in the task
+uint8_t SampleTime;
+
 typedef struct {
     uint8_t InAuto;
     float Ki;
@@ -53,16 +62,23 @@ uint8_t SampleTime;
 // if it is included here
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
 
-void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig);
-void PIDController_ControllerUpdateTunings(PIDController_Config* pidControllerConfig);
-void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode);
-void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig);
-void PIDController_SetDirection(int direction);
-void PIDController_Stop();
-void PIDController_Start();
 void PIDController_Init(void);
 void PIDController_Register(void);
 void PIDController_Task(void const * argument);
+void PIDController_Stop();
+void PIDController_Start();
+void PIDController_SetMode(uint8_t newMode);
+void PIDController_NormalMode();
+void PIDController_SpinMode();
+void PIDController_SetDirection(int direction);
+
+/******************
+ * These are the actual PID methods
+ ******************/
+void PIDController_ControllerReset(PIDController_Config *controllerConfig);
+void PIDController_ControllerCompute(PIDController_Config* pidControllerConfig);
+void PIDController_ControllerSetMode(PIDController_Config* pidControllerConfig, int Mode);
+void PIDController_ControllerReInitialize(PIDController_Config* pidControllerConfig);
 
 
 #endif /* PIDCONTROLLER_H_ */
