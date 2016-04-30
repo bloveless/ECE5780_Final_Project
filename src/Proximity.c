@@ -1,7 +1,7 @@
 #include "Proximity.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
-uint32_t ADC_Threshold = 1300;///////////////////////////////////////////////////////////
+uint32_t ADC_Threshold = 1500;///////////////////////////////////////////////////////////
 uint32_t UltraSonic_Threshold = 15;
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,14 +30,25 @@ void Proximity_Task(void const * argument)
         UltraSonic_Enabled = 0;
         PIDController_Stop();
         osDelay(1000);
-        HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_SET);
+
+        GPIO_InitTypeDef GPIO_InitStruct;
+        GPIO_InitStruct.Pin = Ultrasonic_1_Echo_Pin;
+        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        HAL_GPIO_Init(Ultrasonic_1_Echo_GPIO_Port, &GPIO_InitStruct);
+
+        HAL_GPIO_WritePin(Ultrasonic_1_Echo_GPIO_Port, Ultrasonic_1_Echo_Pin, GPIO_PIN_SET);
         osDelay(1);
-        HAL_GPIO_WritePin(GPIOB, Ultrasonic_1_Pulse_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(Ultrasonic_1_Echo_GPIO_Port, Ultrasonic_1_Echo_Pin, GPIO_PIN_RESET);
+
+        HAL_TIM_Base_MspInit(&htim15);
+
       }
       else if(adcValue < (ADC_Threshold - 300) && !spinning)
       {
         UltraSonic_Enabled = 1;
-        Servo_SetPosition(0);
+        //Servo_SetPosition(0);
       }
     }
     osDelay(50);
