@@ -1,7 +1,7 @@
 #include "Proximity.h"
 
 //TUNNING VARIABLES//////////////////////////////////////////////////////////////////////
-uint32_t ADC_Threshold = 1500;///////////////////////////////////////////////////////////
+uint32_t ADC_Threshold = 2100;///////////////////////////////////////////////////////////
 uint32_t UltraSonic_Threshold = 15;
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ void Proximity_Task(void const * argument)
       else if(adcValue < (ADC_Threshold - 300) && !spinning)
       {
         UltraSonic_Enabled = 1;
-        //Servo_SetPosition(0);
+        Servo_SetPosition(0);
       }
     }
     osDelay(50);
@@ -68,9 +68,9 @@ void ProcessUltrasonic(TIM_HandleTypeDef *htim)
   // found a stair
   if(captureValue > UltraSonic_Threshold)
   {
-    Servo_SetPosition(90);
+    Servo_SetPosition(75);
     PIDController_Start();
-    spinning = 1; ///DON'T LEAVE THIS
+    spinning = 1;
     return;
   }
 

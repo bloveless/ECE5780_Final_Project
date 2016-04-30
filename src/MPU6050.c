@@ -6,7 +6,6 @@
  */
 
 #include "MPU6050.h"
-#include "Servo.h"
 
 // #define TRACE_I2C_DEBUG
 
@@ -37,40 +36,51 @@ void MPU6050_Init(){
 
 	volatile HAL_StatusTypeDef lastStatus;
 
+	HAL_Delay(250);
 	lastStatus = HAL_I2C_IsDeviceReady(&hi2c1, MPU6050_ADDRESS, 1, I2C_TIMEOUT);
+	HAL_Delay(250);
+
 	if(lastStatus == HAL_TIMEOUT){
 		MPU6050_Reset();
 		lastStatus = HAL_I2C_IsDeviceReady(&hi2c1, MPU6050_ADDRESS, 1, I2C_TIMEOUT);
+	HAL_Delay(250);
 	}
 	if(lastStatus == HAL_OK) {
+
 		tx_data[0] = MPU6050_PWR_MGMT_1;
 		tx_data[1] = MPU6050_PWR_MGMT_1_DEVICE_RESET; // Device Reset
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
-		HAL_Delay(100);
+	HAL_Delay(250);
 
 		tx_data[0] = MPU6050_PWR_MGMT_1;
 		tx_data[1] = MPU6050_PWR_MGMT_1_CLKSEL_0; // Clock select - Internal 8MHz oscillator
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
-		HAL_Delay(100);
+	HAL_Delay(250);
 
 		// SET Range +-2G
 		tx_data[0] = MPU6050_ACCEL_CONFIG;
 		tx_data[1] = MPU6050_ACCEL_CONFIG_AFS_SEL_2G;
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
+	HAL_Delay(250);
 
 		// GYRO config
 		tx_data[0] = MPU6050_GYRO_CONFIG;
 		tx_data[1] = MPU6050_GYRO_CONFIG_FS_SEL_250;
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
+	HAL_Delay(250);
 
 		tx_data[0] = MPU6050_CONFIG;
 		tx_data[1] = MPU6050_CONFIG_DLPF_CFG_6;
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
+	HAL_Delay(250);
 
 		tx_data[0] = MPU6050_USER_CTRL;
 		tx_data[1] = MPU6050_USER_CTRL_SIG_COND_RESET;
 		lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 2, I2C_TIMEOUT);
-		HAL_Delay(100);
+	  HAL_Delay(250);
+	  lastStatus = HAL_I2C_IsDeviceReady(&hi2c1, MPU6050_ADDRESS, 1, I2C_TIMEOUT);
+
+
 	}
 }
 
@@ -80,26 +90,64 @@ void MPU6050_Reg(){
 }
 
 void MPU6050_Task(){
-
+//  Servo_SetPosition(0);
+//  Servo_SetPosition(75);
+uint8_t index=0;
 	while(1) {
+//	  Servo_SetPosition(80);
+
 		MPU6050_Read(&rData);
-		if((rData.AccelZ) <= -2800) {
-			looking_down = 1;
+		int16_t upperBound = 2000;
+		int16_t lowerBound = -2000;
+		uint8_t looking_up;
+
+		switch (index) {
+		  case 0:
+		    if((rData.AccelZ) >= upperBound){
+		      index++;
+		    }
+		  break;
+		  case 1:
+		    if((rData.AccelZ) <= upperBound){
+		              index++;
+		    }
+		  break;
+		  case 2:
+		    osDelay(40);
+	      Servo_SetPosition(0);
+	      PIDController_Stop();
+	      spinning = 0;
+	      osDelay(1000);
+	      PIDController_Start();
+		    index = 0;
+		  break;
 		}
 
-		if((rData.AccelZ) >= -2800 && looking_down == 1){
-			Servo_SetPosition(0);
-			looking_down = 0;
-		}
+//		if((rData.AccelZ) >= upperBound) {
+//		      looking_up = 1;
+//		}
+//
+//		if((rData.AccelZ) <= lowerBound) {
+//			looking_down = 1;
+//		}
+//
+//		if((rData.AccelZ) >= lowerBound && looking_down == 1  && looking_up == 1){
+//			Servo_SetPosition(0);
+//			PIDController_Stop();
+//			spinning = 0;
+//			osDelay(5000);
+//			PIDController_Start();
+//			looking_down = 0;
+//		}
 
-		if((rData.AccelZ) >= -1800 || (rData.AccelZ) <= -2800){
-		  HAL_GPIO_WritePin(MPU6050_Status_LED_GPIO_Port,MPU6050_Status_LED_Pin,GPIO_PIN_SET);
-		}
-		else{
+		if((rData.AccelZ >= lowerBound) && (rData.AccelZ <= upperBound)){
 		  HAL_GPIO_WritePin(MPU6050_Status_LED_GPIO_Port,MPU6050_Status_LED_Pin,GPIO_PIN_RESET);
 		}
+		else{
+		  HAL_GPIO_WritePin(MPU6050_Status_LED_GPIO_Port,MPU6050_Status_LED_Pin,GPIO_PIN_SET);
+		}
 //		trace_printf("G: %d\t\tA: %d\t\tT: %d\n", (&rData)->GyroX/16, (&rData)->AccelX, (&rData)->Temperature);
-		osDelay(100);
+		osDelay(10);
 	}
 }
 
@@ -116,8 +164,12 @@ void MPU6050_Reset(){
 
 void MPU6050_Read(MPU6050_TypeDef *rData){
 	tx_data[0] = MPU6050_ACCEL_XOUT_H;
-	HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 1, I2C_TIMEOUT);
-	if( HAL_I2C_Master_Receive(&hi2c1, MPU6050_ADDRESS, &rx_data[0], 15, I2C_TIMEOUT) == HAL_OK) {
+	volatile HAL_StatusTypeDef lastStatus;
+
+	lastStatus = HAL_I2C_Master_Transmit(&hi2c1, MPU6050_ADDRESS, &tx_data[0], 1, I2C_TIMEOUT);
+	osDelay(250);
+	lastStatus = HAL_I2C_Master_Receive(&hi2c1, MPU6050_ADDRESS, &rx_data[0], 14, I2C_TIMEOUT);
+	if(lastStatus == HAL_OK) {
 
 		int16_t tempRaw = ((int16_t)rx_data[6] << 8) | rx_data[7];
 		rData->Temperature = (int16_t)(((float)tempRaw)/340+36.53);

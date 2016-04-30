@@ -180,7 +180,7 @@ void PIDController_ControllerReset(PIDController_Config *controllerConfig)
   controllerConfig->Kd = 50;
   controllerConfig->Input = 0;
   controllerConfig->Output = 0;
-  controllerConfig->Goal = 3;
+  controllerConfig->Goal = 2;
   controllerConfig->OutMin = 0;
   controllerConfig->OutMax = 65535;
   controllerConfig->Last = 0;

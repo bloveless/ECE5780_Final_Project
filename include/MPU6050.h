@@ -8,12 +8,14 @@
 #include "cmsis_os.h"
 #include "diag/Trace.h"
 #include "i2c.h"
+#include "Servo.h"
+#include "PIDController.h"
 
 #ifndef MPU6050_H_
 #define MPU6050_H_
 
 #define MPU6050_ADDRESS 0xD0
-#define I2C_TIMEOUT			(uint32_t)(50)
+#define I2C_TIMEOUT			(uint32_t)(500)
 
 #define MPU6050_PWR_MGMT_1					(uint8_t)(0x6B)
 #define MPU6050_PWR_MGMT_1_CLKSEL_0			(uint8_t)(0x00) //Internal 8MHz oscillator
