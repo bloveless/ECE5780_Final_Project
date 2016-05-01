@@ -5,6 +5,7 @@ Our project is a stair climbing robot. It can detect a wall and turn around, the
 We used FreeRTOS as a scheduler and added each section of our code to a new task. Essentially this modularizes our code and allowed us to working freely and independently of each other.
 
 Video Link:   [YouTube](https://www.youtube.com/watch?v=Zx6ETbFkieo)
+
 Project Link: [GitHub](https://github.com/bloveless/ECE5780_Final_Project)
 
 
